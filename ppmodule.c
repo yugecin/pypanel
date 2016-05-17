@@ -54,16 +54,16 @@ static PyObject * _ppclear(PyObject *self, PyObject *args) {
 /*---------------------------------------------------------*/
     Window win;
     int x, y, w, h;
-    
-    
+
+
     if (!PyArg_ParseTuple(args, "liiii", &win, &x, &y, &w, &h))
         return NULL;
-    
+
     XClearArea(dsp, win, x, y, w, h, False);
     XFlush(dsp);
     return Py_BuildValue("i", 1);
 }
-    
+
 /*--------------------------------------------------------*/
 static PyObject * _ppfont(PyObject *self, PyObject *args) {
 /*--------------------------------------------------------*/
@@ -78,13 +78,13 @@ static PyObject * _ppfont(PyObject *self, PyObject *args) {
     char *text;
     int len, font_y, p_height;
     float font_x, limit;
-    
+
     if (!PyArg_ParseTuple(args, "llfifs#", &win, &pixel, &font_x, &p_height,
                           &limit, &text, &len))
         return NULL;
-    
+
     xcol.pixel = pixel;
-        
+
 #ifdef HAVE_XFT
     if (limit) {
         while (1) {
@@ -95,7 +95,7 @@ static PyObject * _ppfont(PyObject *self, PyObject *args) {
                 break;
         }
     }
-     
+
     XQueryColor(dsp, cmap, &xcol);
     font_y     = xf->ascent+((p_height-(xf->ascent+xf->descent))/2);
     rcol.red   = xcol.red;
@@ -110,7 +110,7 @@ static PyObject * _ppfont(PyObject *self, PyObject *args) {
         while (XTextWidth(xf, text, len) >= limit)
             len--;
     }
-    
+
     XSetForeground(dsp, gc, pixel);
     font_y = xf->ascent+((p_height-xf->ascent)/2);
     XDrawString(dsp, win, gc, font_x, font_y, text, len);
@@ -127,13 +127,12 @@ static PyObject * _ppfontsize(PyObject *self, PyObject *args) {
 #endif
     char *text;
     int len;
-    
-    
+
     if (!PyArg_ParseTuple(args, "s#", &text, &len))
         return NULL;
-    
+
 #ifdef HAVE_XFT
-    XftTextExtentsUtf8(dsp, xf, text, len, &ginfo); 
+    XftTextExtentsUtf8(dsp, xf, text, len, &ginfo);
     return Py_BuildValue("i", ginfo.width);
 #else
     return Py_BuildValue("i", (int)XTextWidth(xf, text, len));
@@ -147,18 +146,18 @@ static PyObject * _ppicon(PyObject *self, PyObject *args) {
     Pixmap win_icon, win_mask;
     Window panel, root;
     XStandardColormap *scm;
-    char *data, *path; 
+    char *data, *path;
     int y, w, h, i_w, i_h, s1, s2;
     float x;
-    
+
     if (!PyArg_ParseTuple(args, "lllfiiiiis#s#", &panel, &win_icon, &win_mask,
                           &x, &y, &w, &h, &i_w, &i_h, &data, &s1, &path, &s2))
         return NULL;
-        
+
     if (s2 > 0)
         /* custom app icon */
         icon = imlib_load_image(path);
-    else if (s1 > 0) 
+    else if (s1 > 0)
         /* _net_wm_icon */
         icon = imlib_create_image_using_data(w, h, (DATA32*)data);
     else if (win_icon) {
@@ -176,10 +175,10 @@ static PyObject * _ppicon(PyObject *self, PyObject *args) {
     else
         /* no icon defined */
         icon = NULL;
-    
+
     if (!icon)
         return Py_BuildValue("i", 0);
-    
+
     imlib_context_set_image(icon);
     imlib_image_set_has_alpha(1);
     imlib_context_set_drawable(panel);
@@ -191,18 +190,17 @@ static PyObject * _ppicon(PyObject *self, PyObject *args) {
 
 /*---------------------------------------------------------*/
 static PyObject * _ppshade(PyObject *self, PyObject *args) {
-/*---------------------------------------------------------*/ 
+/*---------------------------------------------------------*/
     Imlib_Image bg;
     Pixmap bgpm, mask, rpm;
     Window panel;
     char filter[100];
     int x, y, w, h, r, g, b, a;
- 
 
     if (!PyArg_ParseTuple(args, "lliiiiiiii", &panel, &rpm, &x, &y, &w, &h,
                           &r, &g, &b, &a))
         return NULL;
-        
+
     if (r > 255) r = 255;
     if (r < 0)   r = 0;
     if (g > 255) g = 255;
@@ -211,28 +209,28 @@ static PyObject * _ppshade(PyObject *self, PyObject *args) {
     if (b < 0)   b = 0;
     if (a > 255) a = 255;
     if (a < 0)   a = 0;
-    
+
     imlib_context_set_drawable(rpm);
     bg = imlib_create_image_from_drawable(0, x, y, w, h, 1);
-        
+
     if (!bg) {
         printf("Failed to create background image in ppshade!\n");
         return Py_BuildValue("i", 0);
     }
-    
-    imlib_context_set_image(bg);    
+
+    imlib_context_set_image(bg);
     sprintf(filter,"tint(x=0,y=0,w=%d,h=%d,red=%d,green=%d,blue=%d,alpha=%d);",
             w,h,r,g,b,a);
     imlib_apply_filter(filter);
     imlib_render_pixmaps_for_whole_image(&bgpm, &mask);
     XSetWindowBackgroundPixmap(dsp, panel, bgpm);
-    imlib_free_pixmap_and_mask(bgpm); 
+    imlib_free_pixmap_and_mask(bgpm);
     imlib_free_image();
     return Py_BuildValue("i", 1);
 }
 
 /*--------------------------------------------------------*/
-static PyObject * _ppinit(PyObject *self, PyObject *args) { 
+static PyObject * _ppinit(PyObject *self, PyObject *args) {
 /*--------------------------------------------------------*/
 #ifdef IMLIB2_FIX
     void *handle;
@@ -240,21 +238,20 @@ static PyObject * _ppinit(PyObject *self, PyObject *args) {
     Window panel;
     XGCValues gcv;
     char *font;
-    
-    
+
     XSetErrorHandler(pperror);
     gcv.graphics_exposures = False;
     dsp = XOpenDisplay(NULL);
     scr = DefaultScreen(dsp);
-    
+
     if (!PyArg_ParseTuple(args, "ls", &panel, &font))
         return NULL;
-    
+
     imlib_context_set_display(dsp);
     imlib_context_set_visual(DefaultVisual(dsp, scr));
     imlib_context_set_colormap(DefaultColormap(dsp, scr));
     imlib_context_set_dither(1);
-    
+
 #ifdef IMLIB2_FIX
     /* Kludge to get around a problem where dlopen fails to open several
        Imlib2 (versions 1.2 and greater) image loaders, namely png and jpeg,
@@ -271,13 +268,13 @@ static PyObject * _ppinit(PyObject *self, PyObject *args) {
         printf("Imlib2 dlopen failed: %s\n", dlerror());
     }
 #endif
-    
+
 #ifdef HAVE_XFT
     if (font[0] == '-')
         xf = XftFontOpenXlfd(dsp, scr, font);
     else
         xf = XftFontOpenName(dsp, scr, font);
-    
+
     visual = DefaultVisual(dsp, scr);
     cmap   = DefaultColormap(dsp, scr);
     draw   = XftDrawCreate(dsp, panel, visual, cmap);
@@ -306,6 +303,6 @@ static PyMethodDef PPMethods[] = {
 
 /*----------------------*/
 void initppmodule(void) {
-/*----------------------*/    
+/*----------------------*/
     Py_InitModule("ppmodule", PPMethods);
 }
