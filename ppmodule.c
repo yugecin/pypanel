@@ -1,3 +1,6 @@
+
+/* vim: set ts=4 sw=4 expandtab: */
+
 /*
 PyPanel v2.4 - Lightweight panel/taskbar for X11 window managers
 Copyright (c) 2003-2005 Jon Gelo (ziljian@users.sourceforge.net)
