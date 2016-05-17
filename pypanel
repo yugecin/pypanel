@@ -943,6 +943,11 @@ SHADED_SHADOW_COLOR    = "0xffffff"
 MINIMIZED_SHADOW_COLOR = "0xffffff"
 DESKTOP_SHADOW_COLOR   = "0xffffff"
 CLOCK_SHADOW_COLOR     = "0xffffff"
+# 130211
+T_FILL  = 0
+T_WIDTH = 180
+# 130521
+TIME_BEATS = 0
 
 #-------------------------
 if __name__ == "__main__":
