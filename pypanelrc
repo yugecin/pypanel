@@ -42,9 +42,13 @@ P_HEIGHT        = 24            # Panel height
 
 #------------------------------------------------------------------------------
 # Panel Tasks Options
+# If unicode characters show as multiple characters, you can set T_FORCE_ASCII
+# to 1 to remove unicode characters completely. Usually this is because
+# libXft was not put in the configs in setup.py (path to freetype-config)
 #------------------------------------------------------------------------------
-T_FILL		= 0		# Tasks fill panel width: 0 = No, 1 = Yes
-T_WIDTH 	= 180		# Task width
+T_FILL	    	= 0	        	# Tasks fill panel width: 0 = No, 1 = Yes
+T_WIDTH 	    = 180	    	# Task width
+T_FORCE_ASCII   = 0             # Remove unicode characters: 0 = No, 1 = Yes
 
 #------------------------------------------------------------------------------
 # Icon Size Options: Measured in pixels

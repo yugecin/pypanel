@@ -139,9 +139,14 @@ class PyPanel(object):
     def drawText(self, obj, x, width):
     #---------------------------------
         """ Draw the given objects name at x """
+        if T_FORCE_ASCII == 0:
+            title = obj.name.encode('utf-8')
+        else:
+            title = obj.name.encode('ascii', 'ignore')
+
         if SHADOWS:
-            ppfont(self.window.id, obj.shadow, x+1, P_HEIGHT+2, width, obj.name)
-        ppfont(self.window.id, obj.color, x, P_HEIGHT, width, obj.name)
+            ppfont(self.window.id, obj.shadow, x+1, P_HEIGHT+2, width, title)
+        ppfont(self.window.id, obj.color, x, P_HEIGHT, width, title)
 
     #----------------------------------
     def setStruts(self, win, hidden=0):
@@ -948,6 +953,8 @@ T_FILL  = 0
 T_WIDTH = 180
 # 130521
 TIME_BEATS = 0
+# 160519
+T_FORCE_ASCII = 0
 
 #-------------------------
 if __name__ == "__main__":
