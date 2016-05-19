@@ -46,8 +46,8 @@ P_HEIGHT        = 24            # Panel height
 # to 1 to remove unicode characters completely. Usually this is because
 # libXft was not put in the configs in setup.py (path to freetype-config)
 #------------------------------------------------------------------------------
-T_FILL	    	= 0	        	# Tasks fill panel width: 0 = No, 1 = Yes
-T_WIDTH 	    = 180	    	# Task width
+T_FILL          = 0             # Tasks fill panel width: 0 = No, 1 = Yes
+T_WIDTH         = 180           # Task width
 T_FORCE_ASCII   = 0             # Remove unicode characters: 0 = No, 1 = Yes
 
 #------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ TRAY_I_WIDTH    = 24            # System tray icon width  (usually 16 or 24)
 # Panel Clock Format: 'man strftime' for detailed formatting options and help
 #------------------------------------------------------------------------------
 CLOCK_FORMAT    = "%Y-%m-%d %H:%M"    # Ex: 2004-09-25 17:45
-TIME_BEATS      = 0   # Set to 1 to show time in Swatch Internet Time
+TIME_BEATS      = 0 # Set to 1 to show time in Swatch Internet Time
 
 #------------------------------------------------------------------------------
 # Clock Delay: Seconds between each clock update during periods of inactivity
@@ -116,10 +116,10 @@ SHOWMINIMIZED   = 0
 #
 # Add entries using the following format -
 #     "<application name>" : "<full path to icon>",
+# Ex: "example" : "/usr/share/imlib2/data/images/audio.png",
 #------------------------------------------------------------------------------
 ICON_LIST       = {
                    "default" : "",
-                   "example" : "/usr/share/imlib2/data/images/audio.png",
                   }
 
 #------------------------------------------------------------------------------
@@ -127,10 +127,10 @@ ICON_LIST       = {
 #                          application launcher.
 #
 # Add entries using the following format -
-#     ("<executable>", "<full path to icon>")
+#     ("<executable>", "<full path to icon>"),
+# Ex: ("gimp-2.2", "/usr/share/imlib2/data/images/paper.png"),
 #------------------------------------------------------------------------------
 LAUNCH_LIST     = [
-                   ("gimp-2.2", "/usr/share/imlib2/data/images/paper.png"),
                   ]
 
 #------------------------------------------------------------------------------
