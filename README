@@ -41,8 +41,10 @@ no syntax errors or the panel will not start!
 1. Adjust paths in setup.py as needed
 2. python setup.py install
 3. pypanel &
-4. If upgrading to 2.x from 1.3, you will need to replace your current
-   ~/.pypanelrc with the new version:
+
+When upgrading, newer config options may not be present in your ~/.pypanelrc
+Default options will be applied if these newer options aren't found. You can
+replace your current rc with the new version:
 
    a. Move your current ~/.pypanelrc to a backup location or backup name
    b. Start PyPanel so a new ~/.pypanelrc is created
@@ -88,6 +90,11 @@ http://pypanel.sourceforge.net
 -------------------------------------------------------------------------------
                                     History
 -------------------------------------------------------------------------------
+160519   Bug fixes:
+            Fix crashes caused by unicode characters in window titles
+         New config options:
+            T_FORCE_ASCII : Should unicode characters be removed completely
+
 160517   yugecin forks pypanel from dathlukan's fork
 
 130521   New features (by AnthonyTedjamulia):
