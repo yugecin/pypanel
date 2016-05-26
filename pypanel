@@ -426,7 +426,7 @@ class PyPanel(object):
         """ Return the name of the given task obj """
         try:
             name = task.get_full_property(self._NAME, 0) or task.get_full_property(Xatom.WM_NAME, 0)
-            return name.value
+            return name.value.decode('utf-8')
         except:
             return ""
 

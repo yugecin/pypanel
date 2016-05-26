@@ -90,8 +90,11 @@ http://pypanel.sourceforge.net
 -------------------------------------------------------------------------------
                                     History
 -------------------------------------------------------------------------------
+160526   Bug fixes:
+            Fix crashes caused by unicode characters in window titles (issue#2)
+
 160519   Bug fixes:
-            Fix crashes caused by unicode characters in window titles
+            Fix crashes caused by unicode characters in window titles (issue#1)
          New config options:
             T_FORCE_ASCII : Should unicode characters be removed completely
 
