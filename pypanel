@@ -136,6 +136,12 @@ class HorizontalLayout(object):
 
         return limit
 
+    #------------------------------------------
+    def drawClockDesktopText(self, panel, obj):
+    #------------------------------------------
+
+        panel.drawText(obj, self.x, self.y, obj.width)
+
 #----------------------------------------------------------------------------
 class VerticalLayout(object):
 #----------------------------------------------------------------------------
@@ -237,6 +243,15 @@ class VerticalLayout(object):
             limit = 1
 
         return limit
+
+    #------------------------------------------
+    def drawClockDesktopText(self, panel, obj):
+    #------------------------------------------
+
+        if obj.width < P_THICKNESS:
+            # nicely in the middle of the bar if vertical (and enough space)
+            x = (P_THICKNESS - obj.width) / 2
+            panel.drawText(obj, x, self.y, obj.width)
 
 #----------------------------------------------------------------------------
 class PyPanel(object):
@@ -877,7 +892,7 @@ class PyPanel(object):
         location   = self.location
         tasks      = panel[TASKS].tasks     # all tasks
         visible    = []                     # visible tasks
-        location.x = P_SPACER
+        location.x = 0
         location.y = 0
         space      = P_LENGTH - P_SPACER    # space we have to display tasks
         cdt        = self.getDesktop()
@@ -885,6 +900,11 @@ class PyPanel(object):
         desktop    = None
         tray       = None
         launcher   = None
+
+        if P_LOCATION < 2:
+            location.x = P_SPACER
+        else:
+            location.y = P_SPACER
 
         if CLOCK:
             clock = panel[CLOCK]
@@ -955,6 +975,7 @@ class PyPanel(object):
                             win.poly_segment(self.lgc, [(location.x, 0, location.x, P_THICKNESS)])
                         '''
 
+                    # update position to end of tasks part
                     location.x = final[0]
                     location.y = final[1]
 
@@ -967,7 +988,7 @@ class PyPanel(object):
                 clock.x1 = location.x
                 clock.y1 = location.y
 
-                self.drawText(clock, location.x, location.y, clock.width)
+                location.drawClockDesktopText(self, clock)
                 location.incPos(P_SPACER)
 
                 if P_LOCATION < 2:
@@ -989,7 +1010,7 @@ class PyPanel(object):
                 desktop.y1 = location.y
                 desk = panel[section].names[cdt]
 
-                self.drawText(desk, location.x, location.y, desk.width)
+                location.drawClockDesktopText(self, desk)
                 location.incPos(P_SPACER)
 
                 if P_LOCATION < 2:
