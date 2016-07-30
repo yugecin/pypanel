@@ -717,8 +717,7 @@ class PyPanel(object):
     #----------------------
         """ Hide/Unhide the Panel """
         if self.hidden:
-            #TODO this is still fucked
-            self.window.configure(y=self.location.absy, height=P_THICKNESS)
+            self.window.configure(x=self.location.posx, y=self.location.posy, width=self.location.width, height=self.location.height)
             self.setStruts(self.window, hidden=0)
             if ABOVE:
                 self.sendEvent(self.window, self._STATE, [0, self._BELOW])
@@ -727,12 +726,24 @@ class PyPanel(object):
                 self.sendEvent(self.window, self._STATE, [1, self._BELOW])
                 self.sendEvent(self.window, self._STATE, [0, self._ABOVE])
         else:
+            x = self.location.posx
+            y = self.location.posy
+            width = self.location.width
+            height = self.location.height
             if P_LOCATION == 0:
                 y = 0
-            else:
-                y = self.screen.height_in_pixels - HIDDEN_SIZE
+                height = HIDDEN_SIZE
+            elif P_LOCATION == 1:
+                y += P_THICKNESS - HIDDEN_SIZE
+                height = HIDDEN_SIZE
+            elif P_LOCATION == 2:
+                x = 0
+                width = HIDDEN_SIZE
+            elif P_LOCATION == 3:
+                x += P_THICKNESS - HIDDEN_SIZE
+                width = HIDDEN_SIZE
 
-            self.window.configure(y=y, height=HIDDEN_SIZE)
+            self.window.configure(x=x, y=y, width=width, height=height)
             self.setStruts(self.window, hidden=1)
 
         self.hidden = not self.hidden
@@ -1057,7 +1068,7 @@ class PyPanel(object):
                     t = tray.tasks[tid]
                     t.x = location.x
                     t.y = location.y
-                    t.obj.configure(onerror=self.error, x=location.x, y=location.y, width=I_SIZE, height=I_SIZE) # TODO tray icon size? width height
+                    t.obj.configure(onerror=self.error, x=location.x, y=location.y, width=I_SIZE, height=I_SIZE)
                     t.obj.map(onerror=self.error)
                     location.incToNextTrayIcon(count, len(tray.order))
                     count += 1
