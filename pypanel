@@ -199,11 +199,6 @@ class VerticalLayout(object):
             h = I_HEIGHT
             name = task.tclass
 
-        print('draw icon at')
-        print(x)
-        print(y)
-        print(w)
-        print(h)
         icon = task.icon
         rc = ppicon(winid, icon.pixmap, icon.mask, x, y, icon.width, icon.height, w, h, icon.data, icon.path)
         if not rc:
