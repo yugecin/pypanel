@@ -895,31 +895,19 @@ class PyPanel(object):
             clock = panel[CLOCK]
             clock.name  = self.getClockData()
             clock.width = ppfontsize(clock.name) + 2
-            space -= clock.width + P_SPACER*2
+            space -= clock.width + P_SPACER * 2
         if DESKTOP:
             desktop = panel[DESKTOP]
             space -= desktop.names[cdt].width + P_SPACER*2
         if LAUNCHER and panel[LAUNCHER].tasks:
             launcher = panel[LAUNCHER]
-            space -= len(launcher.order)*APPL_I_HEIGHT + 2 # TODO make all icons squares
-            # icons should be square anyways so layout doesn't matter here :-)
+            space -= len(launcher.order)*I_SIZE + 2
         if TRAY and panel[TRAY].tasks:
             tray = panel[TRAY]
             space -= 2
             for t in panel[TRAY].tasks.values():
-                '''
-                if TRAY_I_WIDTH:
-                    t.width = TRAY_I_WIDTH
-                    space -= t.width
-                else:
-                    try:
-                        t.width = t.obj.get_wm_normal_hints().min_width
-                        space -= t.width
-                    except:
-                        pass
-                '''
-                space -= TRAY_I_WIDTH
-                # icons should be square anyways so layout doesn't matter here :-)
+                t.width = I_SIZE
+                space -= I_SIZE
         if TASKS and tasks:
             for task in panel[TASKS].order:
                 t = tasks[task]
