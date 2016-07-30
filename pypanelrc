@@ -59,8 +59,9 @@ I_SIZE          = 15 # I_SIZE is also being used for element height in vertical 
 #------------------------------------------------------------------------------
 # Panel Clock Format: 'man strftime' for detailed formatting options and help
 #------------------------------------------------------------------------------
-CLOCK_FORMAT    = "%Y-%m-%d %H:%M"    # Ex: 2004-09-25 17:45
-TIME_BEATS      = 0 # Set to 1 to show time in Swatch Internet Time
+CLOCK_FORMAT    = "%Y-%m-%d %H:%M"  # Ex: 2004-09-25 17:45
+TIME_BEATS      = 0                 # Set to 1 to show time in Swatch Internet Time
+BEATS_FORMAT    = "@%.2f .beats"    # format to show Swatch Internet Time
 
 #------------------------------------------------------------------------------
 # Clock Delay: Seconds between each clock update during periods of inactivity

@@ -854,11 +854,8 @@ class PyPanel(object):
                 return rawBeats + 1000
             return rawBeats
 
-        def _fmt(clnBeats):
-            return "@%.2f .beats"%(clnBeats)
-
         def _cleanBeatsCalculation(hour, minute, second):
-            return _fmt(_cleanupBeats(sum([
+            return BEATS_FORMAT % (_cleanupBeats(sum([
                 hour * 3600,
                 minute * 60,
                 second,
@@ -1277,6 +1274,7 @@ T_FORCE_ASCII = 0
 I_SIZE = None
 P_THICKNESS = None
 P_LENGTH = None
+BEATS_FORMAT = "@%.2f .beats"
 
 #-------------------------
 if __name__ == "__main__":
