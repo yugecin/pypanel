@@ -900,11 +900,21 @@ class PyPanel(object):
             clock = panel[CLOCK]
             clock.name  = self.getClockData()
             clock.width = ppfontsize(clock.name)
-            space -= clock.width + P_SPACER
+
+            space -= P_SPACER
+            if P_LOCATION < 2:
+                space -= clock.width
+            else:
+                space -= I_SIZE
 
         if DESKTOP:
             desktop = panel[DESKTOP]
-            space -= desktop.names[cdt].width + P_SPACER
+
+            space -= P_SPACER
+            if P_LOCATION < 2:
+                space -= desktop.names[cdt].width
+            else:
+                space -= I_SIZE
 
         if LAUNCHER and panel[LAUNCHER].tasks:
             launcher = panel[LAUNCHER]
@@ -914,7 +924,8 @@ class PyPanel(object):
             tray = panel[TRAY]
             for t in panel[TRAY].tasks.values():
                 t.width = I_SIZE
-                space -= I_SIZE
+                if P_LOCATION < 2:
+                    space -= I_SIZE
             space -= P_SPACER
 
         if TASKS and tasks:
