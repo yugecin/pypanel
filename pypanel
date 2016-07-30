@@ -136,7 +136,7 @@ class HorizontalLayout(object):
     def drawClockDesktopText(self, panel, obj):
     #------------------------------------------
 
-        panel.drawText(obj, self.x, self.y, obj.width)
+        panel.drawText(obj, obj.x1, obj.y1, obj.width)
 
 #----------------------------------------------------------------------------
 class VerticalLayout(object):
@@ -241,7 +241,7 @@ class VerticalLayout(object):
         if obj.width < P_THICKNESS:
             # nicely in the middle of the bar if vertical (and enough space)
             x = (P_THICKNESS - obj.width) / 2
-            panel.drawText(obj, x, self.y, obj.width)
+            panel.drawText(obj, x, obj.y1, obj.width)
 
 #----------------------------------------------------------------------------
 class PyPanel(object):
@@ -999,6 +999,8 @@ class PyPanel(object):
                 desktop.x1 = location.x
                 desktop.y1 = location.y
                 desk = panel[section].names[cdt]
+                desk.x1 = desktop.x1
+                desk.y1 = desktop.y1
 
                 location.drawClockDesktopText(self, desk)
                 location.incPos(P_SPACER)
@@ -1216,7 +1218,7 @@ class PyPanel(object):
                 if clock.name != now:
                     clock.name = now
                     self.clearPanel(clock.x1, clock.y1, clock.x2 - clock.x1, clock.y2 - clock.y1)
-                    self.drawText(clock, clock.x1 + P_SPACER, clock.y1, clock.width)
+                    self.location.drawClockDesktopText(self, clock)
 
 #----------------------------------------------------------------------------
 #                                  Main
