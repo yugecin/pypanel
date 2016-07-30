@@ -182,15 +182,13 @@ class VerticalLayout(object):
         if not launcher and not APPICONS:
             return 0
 
+        w = I_SIZE
+        h = I_SIZE
+
         if launcher:
-            x = (P_THICKNESS-I_SIZE)/2
-            w = I_SIZE
-            h = I_SIZE
+            x = (P_THICKNESS - I_SIZE) / 2
             name = task.app
         else:
-            x = (P_THICKNESS-I_SIZE)/2
-            w = I_SIZE
-            h = I_SIZE
             name = task.tclass
 
         icon = task.icon
