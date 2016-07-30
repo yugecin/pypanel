@@ -134,6 +134,14 @@ class HorizontalLayout(object):
 
         panel.drawText(obj, obj.x1, obj.y1, obj.width)
 
+    #----------------------------
+    def drawLine(self, win, lgc):
+    #----------------------------
+
+        if SHOWLINES:
+            x = self.x - P_SPACER / 2
+            win.poly_segment(lgc, [(x, self.y, x, self.y + P_THICKNESS)])
+
 #----------------------------------------------------------------------------
 class VerticalLayout(object):
 #----------------------------------------------------------------------------
@@ -243,6 +251,14 @@ class VerticalLayout(object):
             x = (P_THICKNESS - obj.width) / 2
             panel.drawText(obj, x, obj.y1, obj.width)
 
+    #----------------------------
+    def drawLine(self, win, lgc):
+    #----------------------------
+
+        if SHOWLINES:
+            y = self.y - P_SPACER / 2
+            win.poly_segment(lgc, [(self.x, y, self.x + P_THICKNESS, y)])
+
 #----------------------------------------------------------------------------
 class PyPanel(object):
 #----------------------------------------------------------------------------
@@ -260,6 +276,7 @@ class PyPanel(object):
         self.focus   = 0                         # Currently focused window
         self.rpm     = None                      # Root pixmap ID
         self.beats   = bool(TIME_BEATS)
+        self.lgc     = None
 
         global P_LOCATION, P_THICKNESS
 
@@ -967,20 +984,16 @@ class PyPanel(object):
                         # update position to next task
                         location.incToNextTask()
 
-                        #TODO these showlines
-                        '''
-                        if v < len(visible) and SHOWLINES:
-                            win.poly_segment(self.lgc, [(location.x, 0, location.x, P_THICKNESS)])
-                        '''
+                        # lines between tasks in vertical mode isn't so good without spacing
+                        if P_LOCATION < 2:
+                            location.drawLine(win, self.lgc)
 
                     # update position to end of tasks part
                     location.x = final[0]
                     location.y = final[1]
 
-                '''
-                if SHOWLINES and not panel[section].last:
-                    win.poly_segment(self.lgc, [(location.y, 0, location.y, P_THICKNESS)])
-                '''
+                if not panel[section].last:
+                    location.drawLine(win, self.lgc)
 
             elif panel[section].id == "clock":
                 clock.x1 = location.x
@@ -999,11 +1012,9 @@ class PyPanel(object):
                 clock.y2 = clock.y1 + I_SIZE
 
 
-                #TODO showlines
-                '''
-                if SHOWLINES and not clock.last:
-                    win.poly_segment(self.lgc, [(curr_x, 0, curr_x, P_HEIGHT)])
-                '''
+                if not clock.last:
+                    location.drawLine(win, self.lgc)
+
             elif panel[section].id == "desktop":
                 desktop.x1 = location.x
                 desktop.y1 = location.y
@@ -1025,11 +1036,9 @@ class PyPanel(object):
 
                 location.incPos(P_SPACER)
 
-                #TODO showlines
-                '''
-                if SHOWLINES and not desktop.last:
-                    win.poly_segment(self.lgc, [(curr_x, 0, curr_x, P_HEIGHT)])
-                '''
+                if not desktop.last:
+                    location.drawLine(win, self.lgc)
+
             elif panel[section].id == "tray" and tray:
 
                 count = 1
@@ -1044,12 +1053,9 @@ class PyPanel(object):
 
                 location.incPos(P_SPACER)
 
-                #TODO showlines
+                if not tray.last:
+                    location.drawLine(win, self.lgc)
 
-                '''
-                if SHOWLINES and not tray.last:
-                    win.poly_segment(self.lgc, [(curr_x, 0, curr_x, P_HEIGHT)])
-                '''
             elif panel[section].id == "launcher" and launcher:
 
                 count = 1
@@ -1065,11 +1071,9 @@ class PyPanel(object):
 
                 location.incPos(P_SPACER)
 
-                #TODO showlines
-                '''
-                if SHOWLINES and not launcher.last:
-                    win.poly_segment(self.lgc, [(curr_x, 0, curr_x, P_HEIGHT)])
-                '''
+                if not launcher.last:
+                    location.drawLine(win, self.lgc)
+
 
     #------------------------------------------------------
     def updateTasks(self, dsp, root, win, panel, update=0):
@@ -1210,7 +1214,7 @@ class PyPanel(object):
                             if self.setState(tasks.tasks[wid], panel, win):
                                 self.updatePanel(root, win, panel)
                 elif e.type == X.Expose and e.count == 0:
-                    if e.width == P_THICKNESS: # TODO wtf is this
+                    if e.width == P_THICKNESS:
                         win.change_property(self._DESKTOP, Xatom.CARDINAL, 32, [0xffffffffL])
                         self.sendEvent(win, self._STATE, [1, self._STICKY])
                         self.sendEvent(win, self._STATE, [1, self._SKIP_PAGER])
