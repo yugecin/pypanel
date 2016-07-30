@@ -996,6 +996,7 @@ class PyPanel(object):
                     location.x += clock.width
                     clock.x2 = location.x
                 else:
+                    location.y += I_SIZE
                     clock.x2 = P_THICKNESS
 
                 clock.y2 = clock.y1 + I_SIZE
@@ -1020,6 +1021,7 @@ class PyPanel(object):
                     location.x += desk.width
                     desktop.x2 = location.x
                 else:
+                    location.y += I_SIZE
                     desktop.x2 = P_THICKNESS
 
                 desktop.y2 = desktop.y1 + I_SIZE
