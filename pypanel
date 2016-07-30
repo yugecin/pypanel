@@ -114,8 +114,7 @@ class HorizontalLayout(object):
     def incToNextTask(self):
     #-----------------------
 
-        # don't need to do anything for horizontal layout
-        return 0
+        self.x += P_SPACER
 
     #------------------------------------------
     def getTaskTextLimit(self, visible, space):
@@ -516,11 +515,11 @@ class PyPanel(object):
                 return 1
 
         if win and task.visible:
-            x = task.x1+P_SPACER
+            x = task.x1
             if APPICONS:
-                x += I_WIDTH+P_SPACER
-            self.clearPanel(x, 0, task.x2-x, task.y2 - task.y1)
-            self.drawText(task, x, task.y1, task.x2 - x - P_SPACER)
+                x += I_WIDTH + P_SPACER
+            self.clearPanel(x, task.y1, task.x2-x, task.y2 - task.y1)
+            self.drawText(task, x, task.y1, task.x2 - x)
 
         return 0
 
@@ -532,11 +531,11 @@ class PyPanel(object):
         if task.name != name:
             task.name = name
             if task.visible:
-                x = task.x1 + P_SPACER
+                x = task.x1
                 if APPICONS:
-                    x += I_WIDTH+P_SPACER
-                self.clearPanel(x, 0, task.x2 - x, task.y2 - task.y1)
-                self.drawText(task, x, task.y1, task.x2 - x - P_SPACER)
+                    x += I_WIDTH + P_SPACER
+                self.clearPanel(x, task.y1, task.x2 - x, task.y2 - task.y1)
+                self.drawText(task, x, task.y1, task.x2 - x)
 
     #-----------------------
     def setIcon(self, task):
@@ -944,7 +943,7 @@ class PyPanel(object):
                         if location.getIcon(self.window.id, task, location.x, location.y):
                             location.x += I_WIDTH + P_SPACER
                         self.drawText(task, location.x, location.y, limit)
-                        location.x += limit + P_SPACER
+                        location.x += limit
                         task.x2 = location.x
                         # update position to next task
                         location.incToNextTask()
