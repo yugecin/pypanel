@@ -78,7 +78,6 @@ class HorizontalLayout(object):
     #--------------------------------------
     def getIcon(self, winid, task, x, y, launcher=0):
     #--------------------------------------
-        """ Get the icon from the given task and draw it at x """
         if not launcher and not APPICONS:
             return 0
 
@@ -91,13 +90,13 @@ class HorizontalLayout(object):
             y = (P_THICKNESS-I_HEIGHT)/2
             w = I_WIDTH
             h = I_HEIGHT
-            name = task.tclass
+            name = 'unknown'
 
         icon = task.icon
         rc = ppicon(winid, icon.pixmap, icon.mask, x, y, icon.width, icon.height, w, h, icon.data, icon.path)
 
         if not rc:
-            #self.clearPanel(x, 0, w, P_THICKNESS)
+            self.clearPanel(x, 0, w, P_THICKNESS)
             sys.stderr.write("Failed to get icon for '%s'\n%s\n\n" % (name, icon.path))
 
         return 1
@@ -150,7 +149,7 @@ class VerticalLayout(object):
     #--------------------------
         global P_LOCATION, P_THICKNESS, P_START, P_LENGTH
 
-        if P_LOCATION == 3:
+        if P_LOCATION == 2:
             self.posx = 0
         else:
             self.posx = screen.width_in_pixels - P_THICKNESS
@@ -187,7 +186,6 @@ class VerticalLayout(object):
     #--------------------------------------
     def getIcon(self, winid, task, x, y, launcher=0):
     #--------------------------------------
-        """ Get the icon from the given task and draw it at y """
         if not launcher and not APPICONS:
             return 0
 
@@ -202,10 +200,15 @@ class VerticalLayout(object):
             h = I_HEIGHT
             name = task.tclass
 
+        print('draw icon at')
+        print(x)
+        print(y)
+        print(w)
+        print(h)
         icon = task.icon
         rc = ppicon(winid, icon.pixmap, icon.mask, x, y, icon.width, icon.height, w, h, icon.data, icon.path)
         if not rc:
-            #self.clearPanel(x, 0, w, P_THICKNESS)
+            self.clearPanel(x, y, w, h)
             sys.stderr.write("Failed to get icon for '%s'\n%s\n\n" % (name, icon.path))
 
         return 1
@@ -333,10 +336,10 @@ class PyPanel(object):
         self.loop(self.display, self.root, self.window, self.panel)
 
     #------------------------------------
-    def clearPanel(self, x1, y1, x2, y2):
+    def clearPanel(self, x, y, w, h):
     #------------------------------------
         """ Clear panel at the given coordinates """
-        ppclear(self.window.id, int(x1), y1, int(x2), y2)
+        ppclear(self.window.id, int(x), y, int(w), h)
         if SHOWBORDER:
             self.window.rectangle(self.lgc, 0, 0, self.location.width-1, self.location.height-1)
 
@@ -364,8 +367,7 @@ class PyPanel(object):
         # Selection owner window
         self.selowin = scr.root.create_window(-1, -1, 1, 1, 0, self.screen.root_depth)
         self.selowin.set_selection_owner(selection, X.CurrentTime)
-        self.sendEvent(self.root, manager,[X.CurrentTime, selection,
-            self.selowin.id], (X.StructureNotifyMask))
+        self.sendEvent(self.root, manager,[X.CurrentTime, selection, self.selowin.id], (X.StructureNotifyMask))
 
     #---------------------------------
     def drawText(self, obj, x, y, width):
@@ -374,6 +376,7 @@ class PyPanel(object):
 
         if width < 1:
             print('bad width')
+            print(width)
             return 0
 
         if T_FORCE_ASCII == 0:
@@ -943,8 +946,6 @@ class PyPanel(object):
 
                     # calculate task text width
                     limit = location.getTaskTextLimit(visible, space)
-                    print('task text width')
-                    print(limit)
 
                     # show all visible tasks, and update task hitbox while doing that
                     for v in range(len(visible)):
@@ -952,12 +953,11 @@ class PyPanel(object):
                         task.x1 = location.x
                         task.y1 = location.y
                         task.y2 = location.y + I_HEIGHT # TODO task icon height should really be set to panel height
-                        if location.getIcon(self.window.id, t, location.x, location.y):
+                        if location.getIcon(self.window.id, task, location.x, location.y):
                             location.x += I_WIDTH + P_SPACER
-                        self.drawText(t, location.x, location.y, limit)
+                        self.drawText(task, location.x, location.y, limit)
                         location.x += limit + P_SPACER
-                        t.x2 = location.x
-                        print(t.x2 - t.x1)
+                        task.x2 = location.x
                         # update position to next task
                         location.incToNextTask()
 
@@ -1026,7 +1026,7 @@ class PyPanel(object):
                     t = tray.tasks[tid]
                     t.x = location.x
                     t.y = location.y
-                    t.obj.configure(onerror=self.error, x=location.x, y=location.y, width=t.width, height=t.height) # TODO tray icon size? width height
+                    t.obj.configure(onerror=self.error, x=location.x, y=location.y, width=I_SIZE, height=I_SIZE) # TODO tray icon size? width height
                     t.obj.map(onerror=self.error)
                     location.incPos(t.width) # this should be square
 
