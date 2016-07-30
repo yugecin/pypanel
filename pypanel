@@ -785,16 +785,16 @@ class PyPanel(object):
             if panel[section].id == "tray":
                 continue
             elif panel[section].id == "desktop":
-                if panel[section].x1 < x and x < panel[section].x2 and panel[section].y1 < y and y < panel[section].y2:
+                if panel[section].x1 <= x and x <= panel[section].x2 and panel[section].y1 <= y and y <= panel[section].y2:
                     desktopButtonEvent(self, e.detail)
                     return
             elif panel[section].id == "clock":
-                if panel[section].x1 < x and x < panel[section].x2 and panel[section].y1 < y and y < panel[section].y2:
+                if panel[section].x1 <= x and x <= panel[section].x2 and panel[section].y1 <= y and y <= panel[section].y2:
                     clockButtonEvent(self, e.detail)
                     return
             elif panel[section].id == "launcher" and e.detail == 1:
                 for a in panel[section].tasks.values():
-                    if a.x1 < x and x < a.x2 and a.y1 < y and y < a.y2:
+                    if a.x1 <= x and x <= a.x2 and a.y1 <= y and y <= a.y2:
                         os.system(a.app)
                         return
             else:
@@ -808,7 +808,7 @@ class PyPanel(object):
                 else:
                     cdt = self.getDesktop()
                     for t in panel[TASKS].tasks.values():
-                        if t.visible and t.x1 < x and x < t.x2 and t.y1 < y and y < t.y2:
+                        if t.visible and t.x1 <= x and x <= t.x2 and t.y1 <= y and y <= t.y2:
                             cdt = self.getDesktop()
                             tdt = t.desk
                             if SHOWALL and cdt != tdt and tdt != 0xffffffffL:
