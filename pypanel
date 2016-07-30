@@ -114,7 +114,7 @@ class HorizontalLayout(object):
     def incToNextTask(self):
     #-----------------------
 
-        self.x += P_SPACER
+        self.x += P_SPACER / 2
 
     #------------------------------------------
     def getTaskTextLimit(self, visible, space):
@@ -373,9 +373,10 @@ class PyPanel(object):
     #---------------------------------
         """ Draw the given objects name at x """
 
+        width += 2 # prevents cutting of last char
+
         if width < 1:
-            print('bad width')
-            print(width)
+            # prevents infinite loop
             return 0
 
         if T_FORCE_ASCII == 0:
@@ -881,32 +882,36 @@ class PyPanel(object):
         location   = self.location
         tasks      = panel[TASKS].tasks     # all tasks
         visible    = []                     # visible tasks
-        location.x = 0
+        location.x = P_SPACER
         location.y = 0
-        space      = P_LENGTH               # space we have to display tasks
+        space      = P_LENGTH - P_SPACER    # space we have to display tasks
         cdt        = self.getDesktop()
         clock      = None
         desktop    = None
         tray       = None
         launcher   = None
 
-        if CLOCK and (P_LOCATION == 0 or P_LOCATION == 1):
+        if CLOCK:
             clock = panel[CLOCK]
             clock.name  = self.getClockData()
-            clock.width = ppfontsize(clock.name) + 2
-            space -= clock.width + P_SPACER * 2
+            clock.width = ppfontsize(clock.name)
+            space -= clock.width + P_SPACER
+
         if DESKTOP:
             desktop = panel[DESKTOP]
-            space -= desktop.names[cdt].width + P_SPACER*2
+            space -= desktop.names[cdt].width + P_SPACER
+
         if LAUNCHER and panel[LAUNCHER].tasks:
             launcher = panel[LAUNCHER]
-            space -= len(launcher.order)*I_SIZE + 2
+            space -= len(launcher.order) * I_SIZE + P_SPACER
+
         if TRAY and panel[TRAY].tasks:
             tray = panel[TRAY]
-            space -= 2
             for t in panel[TRAY].tasks.values():
                 t.width = I_SIZE
                 space -= I_SIZE
+            space -= P_SPACER
+
         if TASKS and tasks:
             for task in panel[TASKS].order:
                 t = tasks[task]
@@ -945,6 +950,7 @@ class PyPanel(object):
                         self.drawText(task, location.x, location.y, limit)
                         location.x += limit
                         task.x2 = location.x
+
                         # update position to next task
                         location.incToNextTask()
 
@@ -966,7 +972,6 @@ class PyPanel(object):
                 clock.x1 = location.x
                 clock.y1 = location.y
 
-                location.incPos(P_SPACER)
                 self.drawText(clock, location.x, location.y, clock.width)
                 location.incPos(P_SPACER)
 
@@ -989,7 +994,6 @@ class PyPanel(object):
                 desktop.y1 = location.y
                 desk = panel[section].names[cdt]
 
-                location.incPos(P_SPACER)
                 self.drawText(desk, location.x, location.y, desk.width)
                 location.incPos(P_SPACER)
 
@@ -1001,13 +1005,14 @@ class PyPanel(object):
 
                 desktop.y2 = desktop.y1 + I_HEIGHT #TODO iconheight is textheight
 
+                location.incPos(P_SPACER)
+
                 #TODO showlines
                 '''
                 if SHOWLINES and not desktop.last:
                     win.poly_segment(self.lgc, [(curr_x, 0, curr_x, P_HEIGHT)])
                 '''
             elif panel[section].id == "tray" and tray:
-                location.incPos(2) # not sure why this is here
 
                 for tid in tray.order:
                     t = tray.tasks[tid]
@@ -1015,9 +1020,9 @@ class PyPanel(object):
                     t.y = location.y
                     t.obj.configure(onerror=self.error, x=location.x, y=location.y, width=I_SIZE, height=I_SIZE) # TODO tray icon size? width height
                     t.obj.map(onerror=self.error)
-                    location.incPos(t.width) # this should be square
+                    location.incPos(t.width)
 
-                location.incPos(1) # not sure why this is here
+                location.incPos(P_SPACER)
 
                 #TODO showlines
 
@@ -1026,7 +1031,6 @@ class PyPanel(object):
                     win.poly_segment(self.lgc, [(curr_x, 0, curr_x, P_HEIGHT)])
                 '''
             elif panel[section].id == "launcher" and launcher:
-                location.incPos(2) # not sure why this is here
 
                 for app in launcher.order:
                     a = launcher.tasks[app]
@@ -1037,7 +1041,7 @@ class PyPanel(object):
                     a.x2 = a.x1 + APPL_I_WIDTH
                     a.y2 = a.y1 + APPL_I_HEIGHT # TODO square again
 
-                location.incPos(1) # not sure why this is here
+                location.incPos(P_SPACER)
 
                 #TODO showlines
                 '''
