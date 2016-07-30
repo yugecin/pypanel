@@ -385,9 +385,9 @@ class PyPanel(object):
         self.selowin.set_selection_owner(selection, X.CurrentTime)
         self.sendEvent(self.root, manager,[X.CurrentTime, selection, self.selowin.id], (X.StructureNotifyMask))
 
-    #---------------------------------
+    #------------------------------------
     def drawText(self, obj, x, y, width):
-    #---------------------------------
+    #------------------------------------
         """ Draw the given objects name at x """
 
         width += 2 # prevents cutting of last char
@@ -977,7 +977,18 @@ class PyPanel(object):
                         task.y2 = location.y + I_SIZE
                         if location.getIcon(self.window.id, task, location.x, location.y):
                             location.x += I_SIZE + P_SPACER
-                        self.drawText(task, location.x, location.y, limit)
+
+                        # draw task text, centered if user wants that
+                        text_x = location.x
+                        text_width = limit
+                        if T_CENTER_TEXT:
+                            text_width = ppfontsize(task.name) + 2
+                            if text_width < limit:
+                                text_x += (limit - text_width) / 2
+                            else:
+                                text_width = limit
+                        self.drawText(task, text_x, location.y, text_width)
+
                         location.x += limit
                         task.x2 = location.x
 
@@ -1279,6 +1290,7 @@ I_SIZE = None
 P_THICKNESS = None
 P_LENGTH = None
 BEATS_FORMAT = "@%.2f .beats"
+T_CENTER_TEXT = 1
 
 #-------------------------
 if __name__ == "__main__":
