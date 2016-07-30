@@ -76,14 +76,14 @@ class HorizontalLayout(object):
             return 0
 
         if launcher:
-            y = (P_THICKNESS-APPL_I_HEIGHT)/2
-            w = APPL_I_WIDTH
-            h = APPL_I_HEIGHT
+            y = (P_THICKNESS-I_SIZE)/2
+            w = I_SIZE
+            h = I_SIZE
             name = task.app
         else:
-            y = (P_THICKNESS-I_HEIGHT)/2
-            w = I_WIDTH
-            h = I_HEIGHT
+            y = (P_THICKNESS-I_SIZE)/2
+            w = I_SIZE
+            h = I_SIZE
             name = 'unknown'
 
         icon = task.icon
@@ -123,7 +123,7 @@ class HorizontalLayout(object):
 
         # if show icons, subtract that from task width too (+ spacer)
         if APPICONS:
-            limit -= I_WIDTH + P_SPACER
+            limit -= I_SIZE + P_SPACER
 
         if limit < 1:
             limit = 1
@@ -183,14 +183,14 @@ class VerticalLayout(object):
             return 0
 
         if launcher:
-            x = (P_THICKNESS-APPL_I_WIDTH)/2
-            w = APPL_I_WIDTH
-            h = APPL_I_HEIGHT
+            x = (P_THICKNESS-I_SIZE)/2
+            w = I_SIZE
+            h = I_SIZE
             name = task.app
         else:
-            x = (P_THICKNESS-I_WIDTH)/2
-            w = I_WIDTH
-            h = I_HEIGHT
+            x = (P_THICKNESS-I_SIZE)/2
+            w = I_SIZE
+            h = I_SIZE
             name = task.tclass
 
         icon = task.icon
@@ -215,7 +215,7 @@ class VerticalLayout(object):
     #-----------------------
 
         self.x = 0
-        self.y += I_HEIGHT
+        self.y += I_SIZE
 
     #------------------------------------------
     def getTaskTextLimit(self, visible, space):
@@ -225,7 +225,7 @@ class VerticalLayout(object):
 
         # if show icons, subtract that from task width too (+ spacer)
         if APPICONS:
-            limit -= I_WIDTH + P_SPACER
+            limit -= I_SIZE + P_SPACER
 
         if limit < 1:
             limit = 1
@@ -383,8 +383,8 @@ class PyPanel(object):
             title = obj.name.encode('ascii', 'ignore')
 
         if SHADOWS:
-            ppfont(self.window.id, obj.shadow, x+1, y+1, I_HEIGHT+2, width, title) # TODO font is icon height?
-        ppfont(self.window.id, obj.color, x, y, I_HEIGHT, width, title)
+            ppfont(self.window.id, obj.shadow, x+1, y+1, I_SIZE+2, width, title)
+        ppfont(self.window.id, obj.color, x, y, I_SIZE, width, title)
 
     #----------------------------
     def setProps(self, dsp, win):
@@ -516,7 +516,7 @@ class PyPanel(object):
         if win and task.visible:
             x = task.x1
             if APPICONS:
-                x += I_WIDTH + P_SPACER
+                x += I_SIZE + P_SPACER
             self.clearPanel(x, task.y1, task.x2-x, task.y2 - task.y1)
             self.drawText(task, x, task.y1, task.x2 - x)
 
@@ -532,7 +532,7 @@ class PyPanel(object):
             if task.visible:
                 x = task.x1
                 if APPICONS:
-                    x += I_WIDTH + P_SPACER
+                    x += I_SIZE + P_SPACER
                 self.clearPanel(x, task.y1, task.x2 - x, task.y2 - task.y1)
                 self.drawText(task, x, task.y1, task.x2 - x)
 
@@ -947,9 +947,9 @@ class PyPanel(object):
                         task = tasks[visible[v]]
                         task.x1 = location.x
                         task.y1 = location.y
-                        task.y2 = location.y + I_HEIGHT # TODO task icon height should really be set to panel height
+                        task.y2 = location.y + I_SIZE
                         if location.getIcon(self.window.id, task, location.x, location.y):
-                            location.x += I_WIDTH + P_SPACER
+                            location.x += I_SIZE + P_SPACER
                         self.drawText(task, location.x, location.y, limit)
                         location.x += limit
                         task.x2 = location.x
@@ -985,7 +985,7 @@ class PyPanel(object):
                 else:
                     clock.x2 = P_THICKNESS
 
-                clock.y2 = clock.y1 + I_HEIGHT #TODO iconheight is textheight
+                clock.y2 = clock.y1 + I_SIZE
 
 
                 #TODO showlines
@@ -1007,7 +1007,7 @@ class PyPanel(object):
                 else:
                     desktop.x2 = P_THICKNESS
 
-                desktop.y2 = desktop.y1 + I_HEIGHT #TODO iconheight is textheight
+                desktop.y2 = desktop.y1 + I_SIZE
 
                 location.incPos(P_SPACER)
 
@@ -1041,9 +1041,9 @@ class PyPanel(object):
                     a.x1 = location.x
                     a.y1 = location.y
                     if self.location.getIcon(self.window.id, a, location.x, location.y, 1):
-                        location.incPos(APPL_I_WIDTH) #TODO square
-                    a.x2 = a.x1 + APPL_I_WIDTH
-                    a.y2 = a.y1 + APPL_I_HEIGHT # TODO square again
+                        location.incPos(I_SIZE)
+                    a.x2 = a.x1 + I_SIZE
+                    a.y2 = a.y1 + I_SIZE
 
                 location.incPos(P_SPACER)
 
@@ -1162,7 +1162,7 @@ class PyPanel(object):
                                 height = t.y2 - t.y
                                 self.clearPanel(x, y, width, height)
                                 if self.location.getIcon(self.window.id, t, x, y):
-                                    x += I_WIDTH+P_SPACER
+                                    x += I_SIZE+P_SPACER
                                 self.drawText(t, x, y, width - P_SPACER)
                 elif e.type == X.ConfigureNotify and TRAY:
                     if e.window.id in tray.tasks:
@@ -1177,7 +1177,7 @@ class PyPanel(object):
                             obj = dsp.create_resource_object("window", task)
                             obj.reparent(tray.window.id, 0, 0)
                             obj.change_attributes(event_mask=(X.ExposureMask|X.StructureNotifyMask))
-                            tray.tasks[task] = Obj(obj=obj, x=0, y=0, width=0, height=TRAY_I_HEIGHT)
+                            tray.tasks[task] = Obj(obj=obj, x=0, y=0, width=0, height=I_SIZE)
                             tray.order.append(task)
                             self.updatePanel(root, win, panel)
                 elif e.type == X.EnterNotify and self.hidden:
