@@ -1253,9 +1253,9 @@ TIME_BEATS = 0
 # 160519
 T_FORCE_ASCII = 0
 # 160730
-P_THICKNESS = P_HEIGHT
-P_LENGTH = P_WIDTH
-I_SIZE = I_HEIGHT
+I_SIZE = None
+P_THICKNESS = None
+P_LENGTH = None
 
 #-------------------------
 if __name__ == "__main__":
@@ -1281,6 +1281,13 @@ if __name__ == "__main__":
         sys.stderr.write("\nFailed to open ~/.pypanelrc -\n\n")
         sys.stderr.write(str(e)+"\n\n")
         sys.exit()
+
+    if I_SIZE == None:
+        I_SIZE = I_WIDTH
+    if P_THICKNESS == None:
+        P_THICKNESS = P_HEIGHT
+    if P_LENGTH == None:
+        P_LENGTH = P_WIDTH
 
     # Version check
     main   = 2.4
