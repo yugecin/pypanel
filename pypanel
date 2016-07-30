@@ -39,6 +39,7 @@ class HorizontalLayout(object):
     #--------------------------
     def __init__(self, screen):
     #--------------------------
+
         global P_LOCATION, P_THICKNESS, P_START, P_LENGTH
 
         if P_LOCATION == 0:
@@ -72,6 +73,7 @@ class HorizontalLayout(object):
     #------------------------------------------------
     def getIcon(self, winid, task, x, y, launcher=0):
     #------------------------------------------------
+
         if not launcher and not APPICONS:
             return 0
 
@@ -146,6 +148,7 @@ class VerticalLayout(object):
     #--------------------------
     def __init__(self, screen):
     #--------------------------
+
         global P_LOCATION, P_THICKNESS, P_START, P_LENGTH
 
         if P_LOCATION == 2:
@@ -179,6 +182,7 @@ class VerticalLayout(object):
     #------------------------------------------------
     def getIcon(self, winid, task, x, y, launcher=0):
     #------------------------------------------------
+
         if not launcher and not APPICONS:
             return 0
 
