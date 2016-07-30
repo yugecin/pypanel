@@ -79,8 +79,8 @@ static PyObject * _ppfont(PyObject *self, PyObject *args) {
     Window win;
     XColor xcol;
     char *text;
-    int len, font_y, p_height;
-    float font_x, limit;
+    int len, p_height;
+    float font_y, font_x, limit;
 
     if (!PyArg_ParseTuple(args, "llffifs#", &win, &pixel, &font_x, &font_y, &p_height,
                           &limit, &text, &len))
