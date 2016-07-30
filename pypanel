@@ -55,15 +55,6 @@ class HorizontalLayout(object):
         self.width = P_LENGTH
         self.height = P_THICKNESS
 
-    #--------------------------
-    def getStrutLocation(self):
-    #--------------------------
-
-        if P_LOCATION == 0:
-            return 'top'
-        else:
-            return 'bottom'
-
     #---------------------
     def incPos(self, inc):
     #---------------------
@@ -163,15 +154,6 @@ class VerticalLayout(object):
 
         self.width = P_THICKNESS
         self.height = P_LENGTH
-
-    #--------------------------
-    def getStrutLocation(self):
-    #--------------------------
-
-        if P_LOCATION == 2:
-            return 'left'
-        else:
-            return 'right'
 
     #---------------------
     def incPos(self, inc):
@@ -444,7 +426,7 @@ class PyPanel(object):
     def setStruts(self, win, hidden=0):
     #----------------------------------
 
-        strutloc = self.location.getStrutLocation()
+        strutloc = ['top', 'bottom', 'left', 'right'][P_LOCATION]
 
         self.struts[strutloc           ] = P_THICKNESS
         self.struts[strutloc + '_start'] = P_START
