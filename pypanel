@@ -30,6 +30,218 @@ class Obj(object):
         self.__dict__.update(kwargs)
 
 #----------------------------------------------------------------------------
+class HorizontalLayout(object):
+#----------------------------------------------------------------------------
+
+    x = 0
+    y = 0
+
+    #--------------------------
+    def __init__(self, screen):
+    #--------------------------
+        global P_LOCATION, P_THICKNESS, P_START, P_LENGTH
+
+        if P_LOCATION == 0:
+            self.posy = 0
+        else:
+            self.posy = screen.height_in_pixels - P_THICKNESS
+
+        if P_LENGTH == 0:
+            P_LENGTH = screen.width_in_pixels
+
+        self.posx = P_START
+
+        self.width = P_LENGTH
+        self.height = P_THICKNESS
+
+    #--------------------------
+    def getStrutLocation(self):
+    #--------------------------
+
+        if P_LOCATION == 0:
+            return 'top'
+        else:
+            return 'bottom'
+
+    #---------------------
+    def incPos(self, inc):
+    #---------------------
+
+        self.x += inc
+
+    #---------------------------
+    def getTextSize(self, text):
+    #---------------------------
+
+        return ppfontsize(text)
+
+    #--------------------------------------
+    def getIcon(self, winid, task, x, y, launcher=0):
+    #--------------------------------------
+        """ Get the icon from the given task and draw it at x """
+        if not launcher and not APPICONS:
+            return 0
+
+        if launcher:
+            y = (P_THICKNESS-APPL_I_HEIGHT)/2
+            w = APPL_I_WIDTH
+            h = APPL_I_HEIGHT
+            name = task.app
+        else:
+            y = (P_THICKNESS-I_HEIGHT)/2
+            w = I_WIDTH
+            h = I_HEIGHT
+            name = task.tclass
+
+        icon = task.icon
+        rc = ppicon(winid, icon.pixmap, icon.mask, x, y, icon.width, icon.height, w, h, icon.data, icon.path)
+
+        if not rc:
+            #self.clearPanel(x, 0, w, P_THICKNESS)
+            sys.stderr.write("Failed to get icon for '%s'\n%s\n\n" % (name, icon.path))
+
+        return 1
+
+    #------------------------------------------
+    def getTaskEndPosition(self, space):
+    #------------------------------------------
+
+        return [
+            self.x + space,
+            self.y
+        ]
+
+    #-----------------------
+    def incToNextTask(self):
+    #-----------------------
+
+        # don't need to do anything for horizontal layout
+        return 0
+
+    #------------------------------------------
+    def getTaskTextLimit(self, visible, space):
+    #------------------------------------------
+
+        limit = space/float(len(visible)) - P_SPACER*2
+        if not T_FILL:
+            # if not fill, set task width to min(limit, t_width)
+            templimit = T_WIDTH - P_SPACER * 2
+            if templimit < limit:
+                limit = templimit;
+
+        # if show icons, subtract that from task width too (+ spacer)
+        if APPICONS:
+            limit -= I_WIDTH + P_SPACER
+
+        if limit < 1:
+            limit = 1
+
+        return limit
+
+#----------------------------------------------------------------------------
+class VerticalLayout(object):
+#----------------------------------------------------------------------------
+
+    x = 0
+    y = 0
+
+    #--------------------------
+    def __init__(self, screen):
+    #--------------------------
+        global P_LOCATION, P_THICKNESS, P_START, P_LENGTH
+
+        if P_LOCATION == 3:
+            self.posx = 0
+        else:
+            self.posx = screen.width_in_pixels - P_THICKNESS
+
+        if P_LENGTH == 0:
+            P_LENGTH = screen.height_in_pixels
+
+        self.posy = P_START
+
+        self.width = P_THICKNESS
+        self.height = P_LENGTH
+
+    #--------------------------
+    def getStrutLocation(self):
+    #--------------------------
+
+        if P_LOCATION == 2:
+            return 'left'
+        else:
+            return 'right'
+
+    #---------------------
+    def incPos(self, inc):
+    #---------------------
+
+        self.y += inc
+
+    #---------------------------
+    def getTextSize(self, text):
+    #---------------------------
+
+        return ppfontsizeheight(text)
+
+    #--------------------------------------
+    def getIcon(self, winid, task, x, y, launcher=0):
+    #--------------------------------------
+        """ Get the icon from the given task and draw it at y """
+        if not launcher and not APPICONS:
+            return 0
+
+        if launcher:
+            x = (P_THICKNESS-APPL_I_WIDTH)/2
+            w = APPL_I_WIDTH
+            h = APPL_I_HEIGHT
+            name = task.app
+        else:
+            x = (P_THICKNESS-I_WIDTH)/2
+            w = I_WIDTH
+            h = I_HEIGHT
+            name = task.tclass
+
+        icon = task.icon
+        rc = ppicon(winid, icon.pixmap, icon.mask, x, y, icon.width, icon.height, w, h, icon.data, icon.path)
+        if not rc:
+            #self.clearPanel(x, 0, w, P_THICKNESS)
+            sys.stderr.write("Failed to get icon for '%s'\n%s\n\n" % (name, icon.path))
+
+        return 1
+
+    #-----------------------------------
+    def getTaskEndPosition(self, space):
+    #-----------------------------------
+
+        return [
+            self.x,
+            self.y + space
+        ]
+
+    #-----------------------
+    def incToNextTask(self):
+    #-----------------------
+
+        self.x = 0
+        self.y += I_HEIGHT
+
+    #------------------------------------------
+    def getTaskTextLimit(self, visible, space):
+    #------------------------------------------
+
+        limit = P_THICKNESS
+
+        # if show icons, subtract that from task width too (+ spacer)
+        if APPICONS:
+            limit -= I_WIDTH + P_SPACER
+
+        if limit < 1:
+            limit = 1
+
+        return limit
+
+#----------------------------------------------------------------------------
 class PyPanel(object):
 #----------------------------------------------------------------------------
     #---------------------------
@@ -47,25 +259,32 @@ class PyPanel(object):
         self.rpm     = None                      # Root pixmap ID
         self.beats   = bool(TIME_BEATS)
 
-        global P_HEIGHT, P_WIDTH, P_LOCATION
+        global P_LOCATION, P_THICKNESS
 
         # Misc. initializations
         if SHOWLINES or SHOWBORDER:
             self.lgc = self.root.create_gc(foreground=self.getColor(LINE_COLOR))
-        if not P_WIDTH:
-            P_WIDTH = self.screen.width_in_pixels - P_START
         if SHOWBORDER:
-            P_HEIGHT += 2
-        if P_LOCATION:
-            P_LOCATION = self.screen.height_in_pixels - P_HEIGHT
+            P_THICKNESS += 2
+
+        if P_LOCATION < 2:
+            self.location = HorizontalLayout(self.screen)
         else:
-            P_LOCATION = 0
+            self.location = VerticalLayout(self.screen)
 
         # Setup the panel's window
-        self.window = self.screen.root.create_window(P_START, P_LOCATION,
-            P_WIDTH, P_HEIGHT, 0, self.screen.root_depth, window_class=X.InputOutput,
-            visual=X.CopyFromParent, colormap=X.CopyFromParent,
-            event_mask=(X.ExposureMask|X.ButtonPressMask|X.ButtonReleaseMask|X.EnterWindowMask))
+        self.window = self.screen.root.create_window(
+            self.location.posx,
+            self.location.posy,
+            self.location.width,
+            self.location.height,
+            0,
+            self.screen.root_depth,
+            window_class=X.InputOutput,
+            visual=X.CopyFromParent,
+            colormap=X.CopyFromParent,
+            event_mask=(X.ExposureMask|X.ButtonPressMask|X.ButtonReleaseMask|X.EnterWindowMask)
+        )
         ppinit(self.window.id, FONT)
 
         # Init the panel sections
@@ -74,8 +293,7 @@ class PyPanel(object):
             self.panel[DESKTOP] = Obj(id="desktop", names=[], first=0, last=0)
         if CLOCK:
             self.panel["sections"].append(CLOCK)
-            self.panel[CLOCK] = Obj(id="clock", name="", first=0, last=0, x1=0, x2=0,
-                color=self.getColor(CLOCK_COLOR), shadow=self.getColor(CLOCK_SHADOW_COLOR))
+            self.panel[CLOCK] = Obj(id="clock", name="", first=0, last=0, x1=0, x2=0, y1=0, y2=0, color=self.getColor(CLOCK_COLOR), shadow=self.getColor(CLOCK_SHADOW_COLOR))
         if TRAY:
             self.panel["sections"].append(TRAY)
             self.panel[TRAY] = Obj(id="tray", tasks={}, order=[], first=0, last=0, window=self.window)
@@ -92,8 +310,22 @@ class PyPanel(object):
         self.panel[self.panel["sections"][-1]].last = 1
 
         # Init the properties and then start the event loop
+        self.struts = {
+            'top'         : 0,
+            'top_start'   : 0,
+            'top_end'     : 0,
+            'bottom'      : 0,
+            'bottom_start': 0,
+            'bottom_end'  : 0,
+            'left'        : 0,
+            'left_start'  : 0,
+            'left_end'    : 0,
+            'right'       : 0,
+            'right_start' : 0,
+            'right_end'   : 0
+        }
         self.setProps(self.display, self.window)
-        self.setStruts(self.window)
+        self.setStruts(self.window);
         self.getDesktopNames()
         self.root.change_attributes(event_mask=(X.PropertyChangeMask))
         self.window.map()
@@ -106,7 +338,7 @@ class PyPanel(object):
         """ Clear panel at the given coordinates """
         ppclear(self.window.id, int(x1), y1, int(x2), y2)
         if SHOWBORDER:
-            self.window.rectangle(self.lgc, 0, 0, P_WIDTH-1, P_HEIGHT-1)
+            self.window.rectangle(self.lgc, 0, 0, self.location.width-1, self.location.height-1)
 
     #------------------------
     def createLauncher(self):
@@ -117,7 +349,7 @@ class PyPanel(object):
         for app, icon in LAUNCH_LIST:
             order.append(app)
             iobj = Obj(path=icon, data="", width=0, height=0, pixmap=0, mask=0)
-            tasks[app] = Obj(x1=0, x2=0, app=app+" &", icon=iobj)
+            tasks[app] = Obj(x1=0, x2=0, y1=0, y2=0, app=app+" &", icon=iobj)
             self.panel[LAUNCHER].tasks = tasks
             self.panel[LAUNCHER].order = order
 
@@ -136,46 +368,22 @@ class PyPanel(object):
             self.selowin.id], (X.StructureNotifyMask))
 
     #---------------------------------
-    def drawText(self, obj, x, width):
+    def drawText(self, obj, x, y, width):
     #---------------------------------
         """ Draw the given objects name at x """
+
+        if width < 1:
+            print('bad width')
+            return 0
+
         if T_FORCE_ASCII == 0:
             title = obj.name.encode('utf-8')
         else:
             title = obj.name.encode('ascii', 'ignore')
 
         if SHADOWS:
-            ppfont(self.window.id, obj.shadow, x+1, P_HEIGHT+2, width, title)
-        ppfont(self.window.id, obj.color, x, P_HEIGHT, width, title)
-
-    #----------------------------------
-    def setStruts(self, win, hidden=0):
-    #----------------------------------
-        """ Set the panel struts according to the state (hidden/visible) """
-        if P_LOCATION == 0:
-            # top
-            if not hidden:
-                top = P_HEIGHT
-            else:
-                top = HIDDEN_SIZE
-
-            top_start = P_START
-            top_end   = P_START + P_WIDTH
-            bottom = bottom_start = bottom_end = 0
-        else:
-            # bottom
-            top = top_start = top_end = 0
-            if not hidden:
-                bottom = P_HEIGHT
-            else:
-                bottom = HIDDEN_SIZE
-
-            bottom_start = P_START
-            bottom_end   = P_START + P_WIDTH
-
-        win.change_property(self._STRUT, Xatom.CARDINAL, 32, [0, 0, top, bottom])
-        win.change_property(self._STRUTP, Xatom.CARDINAL, 32, [0, 0, top, bottom,
-            0, 0, 0, 0, top_start, top_end, bottom_start, bottom_end])
+            ppfont(self.window.id, obj.shadow, x+1, y+1, I_HEIGHT+2, width, title) # TODO font is icon height?
+        ppfont(self.window.id, obj.color, x, y, I_HEIGHT, width, title)
 
     #----------------------------
     def setProps(self, dsp, win):
@@ -206,18 +414,63 @@ class PyPanel(object):
 
         win.set_wm_name("PyPanel")
         win.set_wm_class("pypanel","PyPanel")
-        win.set_wm_hints(flags=(Xutil.InputHint|Xutil.StateHint),
-            input=0, initial_state=1)
-        win.set_wm_normal_hints(flags=(
-            Xutil.PPosition|Xutil.PMaxSize|Xutil.PMinSize),
-            min_width=P_WIDTH, min_height=P_HEIGHT,
-            max_width=P_WIDTH, max_height=P_HEIGHT)
+        win.set_wm_hints(
+            flags=(
+                Xutil.InputHint|Xutil.StateHint
+            ),
+            input=0,
+            initial_state=1
+        )
+        win.set_wm_normal_hints(
+            flags=(
+                Xutil.PPosition|Xutil.PMaxSize|Xutil.PMinSize
+            ),
+            min_width=self.location.width,
+            min_height=self.location.height,
+            max_width=self.location.width,
+            max_height=self.location.height
+        )
         win.change_property(dsp.intern_atom("_WIN_STATE"),Xatom.CARDINAL,32,[1])
         win.change_property(dsp.intern_atom("_MOTIF_WM_HINTS"),
             dsp.intern_atom("_MOTIF_WM_HINTS"), 32, [0x2, 0x0, 0x0, 0x0, 0x0])
         win.change_property(self._DESKTOP, Xatom.CARDINAL, 32, [0xffffffffL])
         win.change_property(dsp.intern_atom("_NET_WM_WINDOW_TYPE"),
             Xatom.ATOM, 32, [dsp.intern_atom("_NET_WM_WINDOW_TYPE_DOCK")])
+
+    #----------------------------------
+    def setStruts(self, win, hidden=0):
+    #----------------------------------
+
+        strutloc = self.location.getStrutLocation()
+
+        self.struts[strutloc           ] = P_THICKNESS
+        self.struts[strutloc + '_start'] = P_START
+        self.struts[strutloc + '_end'  ] = P_START + P_LENGTH
+
+        if hidden:
+            self.struts[strutloc] = HIDDEN_SIZE
+
+        win.change_property(self._STRUT, Xatom.CARDINAL, 32, [
+            self.struts['left'],
+            self.struts['right'],
+            self.struts['top'],
+            self.struts['bottom']
+        ])
+
+        win.change_property(self._STRUTP, Xatom.CARDINAL, 32, [
+            self.struts['left'],
+            self.struts['right'],
+            self.struts['top'],
+            self.struts['bottom'],
+            self.struts['left_start'],
+            self.struts['left_end'],
+            self.struts['right_start'],
+            self.struts['right_end'],
+            self.struts['top_start'],
+            self.struts['top_end'],
+            self.struts['bottom_start'],
+            self.struts['bottom_end']
+        ])
 
     #-----------------------------------------
     def setState(self, task, panel, win=None):
@@ -263,8 +516,8 @@ class PyPanel(object):
             x = task.x1+P_SPACER
             if APPICONS:
                 x += I_WIDTH+P_SPACER
-            self.clearPanel(x, 0, task.x2-x, P_HEIGHT)
-            self.drawText(task, x, task.x2-x-P_SPACER)
+            self.clearPanel(x, 0, task.x2-x, task.y2 - task.y1)
+            self.drawText(task, x, task.y1, task.x2 - x - P_SPACER)
 
         return 0
 
@@ -279,8 +532,8 @@ class PyPanel(object):
                 x = task.x1 + P_SPACER
                 if APPICONS:
                     x += I_WIDTH+P_SPACER
-                self.clearPanel(x, 0, task.x2-x, P_HEIGHT)
-                self.drawText(task, x, task.x2-x-P_SPACER)
+                self.clearPanel(x, 0, task.x2 - x, task.y2 - task.y1)
+                self.drawText(task, x, task.y1, task.x2 - x - P_SPACER)
 
     #-----------------------
     def setIcon(self, task):
@@ -322,33 +575,6 @@ class PyPanel(object):
             icon.path = ICON_LIST["default"] or "%s/pypanel/ppicon.png" % sysconfig.get_python_lib()
 
         task.icon = icon
-
-    #--------------------------------------
-    def getIcon(self, task, x, launcher=0):
-    #--------------------------------------
-        """ Get the icon from the given task and draw it at x """
-        if not launcher and not APPICONS:
-            return 0
-
-        if launcher:
-            y = (P_HEIGHT-APPL_I_HEIGHT)/2
-            w = APPL_I_WIDTH
-            h = APPL_I_HEIGHT
-            name = task.app
-        else:
-            y = (P_HEIGHT-I_HEIGHT)/2
-            w = I_WIDTH
-            h = I_HEIGHT
-            name = task.tclass
-
-        icon = task.icon
-        rc   = ppicon(self.window.id, icon.pixmap, icon.mask, x, y, icon.width,
-                      icon.height, w, h, icon.data, icon.path)
-        if not rc:
-            self.clearPanel(x, 0, w, P_HEIGHT)
-            sys.stderr.write("Failed to get icon for '%s'\n%s\n\n" % (name, icon.path))
-
-        return 1
 
     #-------------------------
     def getDesktopNames(self):
@@ -471,8 +697,9 @@ class PyPanel(object):
     #----------------------
         """ Hide/Unhide the Panel """
         if self.hidden:
-            self.window.configure(y=P_LOCATION, height=P_HEIGHT)
-            self.setStruts(self.window)
+            #TODO this is still fucked
+            self.window.configure(y=self.location.absy, height=P_THICKNESS)
+            self.setStruts(self.window, hidden=0)
             if ABOVE:
                 self.sendEvent(self.window, self._STATE, [0, self._BELOW])
                 self.sendEvent(self.window, self._STATE, [1, self._ABOVE])
@@ -551,20 +778,21 @@ class PyPanel(object):
     #---------------------------------------
         """ Button Release event handler """
         x = e.event_x
+        y = e.event_y
         for section in panel["sections"]:
             if panel[section].id == "tray":
                 continue
             elif panel[section].id == "desktop":
-                if x > panel[section].x1 and x < panel[section].x2:
+                if panel[section].x1 < x and x < panel[section].x2 and panel[section].y1 < y and y < panel[section].y2:
                     desktopButtonEvent(self, e.detail)
                     return
             elif panel[section].id == "clock":
-                if x > panel[section].x1 and x < panel[section].x2:
+                if panel[section].x1 < x and x < panel[section].x2 and panel[section].y1 < y and y < panel[section].y2:
                     clockButtonEvent(self, e.detail)
                     return
             elif panel[section].id == "launcher" and e.detail == 1:
                 for a in panel[section].tasks.values():
-                    if x > a.x1 and x < a.x2:
+                    if a.x1 < x and x < a.x2 and a.y1 < y and y < a.y2:
                         os.system(a.app)
                         return
             else:
@@ -578,7 +806,7 @@ class PyPanel(object):
                 else:
                     cdt = self.getDesktop()
                     for t in panel[TASKS].tasks.values():
-                        if t.visible and x > t.x1 and x < t.x2:
+                        if t.visible and t.x1 < x and x < t.x2 and t.y1 < y and y < t.y2:
                             cdt = self.getDesktop()
                             tdt = t.desk
                             if SHOWALL and cdt != tdt and tdt != 0xffffffffL:
@@ -610,26 +838,36 @@ class PyPanel(object):
             r = int("0x"+BG_COLOR[2:4],0)
             g = int("0x"+BG_COLOR[4:6],0)
             b = int("0x"+BG_COLOR[6:8],0)
-            ppshade(win.id, rpm, P_START, P_LOCATION, P_WIDTH, P_HEIGHT,
-                r, g, b, SHADE)
+            ppshade(win.id, rpm, self.location.posx, self.location.posy, self.location.width, self.location.height, r, g, b, SHADE)
 
+    #-------------------------------------
     def getTimeInBeats(self):
+    #-------------------------------------
+
         def _cleanupBeats(rawBeats):
             if rawBeats > 1000:
                 return rawBeats - 1000
             if rawBeats < 0:
                 return rawBeats + 1000
             return rawBeats
+
         def _fmt(clnBeats):
             return "@%.2f .beats"%(clnBeats)
+
         def _cleanBeatsCalculation(hour, minute, second):
-            return _fmt(_cleanupBeats(sum([hour * 3600,
-                                           minute * 60,
-                                           second,
-                                           time.timezone]) / 86.4))
+            return _fmt(_cleanupBeats(sum([
+                hour * 3600,
+                minute * 60,
+                second,
+                time.timezone
+            ]) / 86.4))
+
         return _cleanBeatsCalculation(*time.localtime()[3:6])
 
+    #-------------------------------------
     def getClockData(self):
+    #-------------------------------------
+
         if self.beats:
             return self.getTimeInBeats()
         return time.strftime(CLOCK_FORMAT, time.localtime())
@@ -638,17 +876,19 @@ class PyPanel(object):
     def updatePanel(self, root, win, panel):
     #---------------------------------------
         """ Redraw the panel """
-        tasks    = panel[TASKS].tasks     # all tasks
-        visible  = []                     # visible tasks
-        curr_x   = 0
-        space    = P_WIDTH
-        cdt      = self.getDesktop()
-        clock    = None
-        desktop  = None
-        tray     = None
-        launcher = None
+        location   = self.location
+        tasks      = panel[TASKS].tasks     # all tasks
+        visible    = []                     # visible tasks
+        location.x = 0
+        location.y = 0
+        space      = P_LENGTH               # space we have to display tasks
+        cdt        = self.getDesktop()
+        clock      = None
+        desktop    = None
+        tray       = None
+        launcher   = None
 
-        if CLOCK:
+        if CLOCK and (P_LOCATION == 0 or P_LOCATION == 1):
             clock = panel[CLOCK]
             clock.name  = self.getClockData()
             clock.width = ppfontsize(clock.name) + 2
@@ -658,11 +898,13 @@ class PyPanel(object):
             space -= desktop.names[cdt].width + P_SPACER*2
         if LAUNCHER and panel[LAUNCHER].tasks:
             launcher = panel[LAUNCHER]
-            space -= len(launcher.order)*APPL_I_WIDTH + 2
+            space -= len(launcher.order)*APPL_I_HEIGHT + 2 # TODO make all icons squares
+            # icons should be square anyways so layout doesn't matter here :-)
         if TRAY and panel[TRAY].tasks:
             tray = panel[TRAY]
             space -= 2
             for t in panel[TRAY].tasks.values():
+                '''
                 if TRAY_I_WIDTH:
                     t.width = TRAY_I_WIDTH
                     space -= t.width
@@ -672,6 +914,9 @@ class PyPanel(object):
                         space -= t.width
                     except:
                         pass
+                '''
+                space -= TRAY_I_WIDTH
+                # icons should be square anyways so layout doesn't matter here :-)
         if TASKS and tasks:
             for task in panel[TASKS].order:
                 t = tasks[task]
@@ -691,72 +936,127 @@ class PyPanel(object):
         for section in panel["sections"]:
             if panel[section].id == "tasks" and TASKS:
                 if not visible:
-                    curr_x += space
+                    location.incPos(space)
                 else:
-                    final_x = curr_x+space
-                    if T_FILL:
-                        limit = space/float(len(visible)) - P_SPACER*2
-                    else:
-                        limit = T_WIDTH - P_SPACER*2 if float(len(visible)) * (T_WIDTH + P_SPACER*2) < space else space/float(len(visible)) - P_SPACER*2
-                    if APPICONS:
-                        limit -= I_WIDTH + P_SPACER
-                    if limit < 1:
-                        limit = 1
+                    # get the end coordinates where tasks can be drawn
+                    final = location.getTaskEndPosition(space)
+
+                    # calculate task text width
+                    limit = location.getTaskTextLimit(visible, space)
+                    print('task text width')
+                    print(limit)
+
+                    # show all visible tasks, and update task hitbox while doing that
                     for v in range(len(visible)):
-                        t = tasks[visible[v]]
-                        t.x1 = curr_x
-                        curr_x += P_SPACER
-                        if self.getIcon(t, curr_x):
-                            curr_x += I_WIDTH + P_SPACER
-                        self.drawText(t, curr_x, limit)
-                        curr_x += limit + P_SPACER
-                        t.x2 = curr_x
+                        task = tasks[visible[v]]
+                        task.x1 = location.x
+                        task.y1 = location.y
+                        task.y2 = location.y + I_HEIGHT # TODO task icon height should really be set to panel height
+                        if location.getIcon(self.window.id, t, location.x, location.y):
+                            location.x += I_WIDTH + P_SPACER
+                        self.drawText(t, location.x, location.y, limit)
+                        location.x += limit + P_SPACER
+                        t.x2 = location.x
+                        print(t.x2 - t.x1)
+                        # update position to next task
+                        location.incToNextTask()
+
+                        #TODO these showlines
+                        '''
                         if v < len(visible) and SHOWLINES:
-                            win.poly_segment(self.lgc, [(curr_x, 0, curr_x, P_HEIGHT)])
-                    curr_x = final_x
+                            win.poly_segment(self.lgc, [(location.x, 0, location.x, P_THICKNESS)])
+                        '''
+
+                    location.x = final[0]
+                    location.y = final[1]
+
+                '''
                 if SHOWLINES and not panel[section].last:
-                    win.poly_segment(self.lgc, [(curr_x, 0, curr_x, P_HEIGHT)])
+                    win.poly_segment(self.lgc, [(location.y, 0, location.y, P_THICKNESS)])
+                '''
+
             elif panel[section].id == "clock":
-                clock.x1 = curr_x
-                curr_x += P_SPACER
-                self.drawText(clock, curr_x, 0)
-                curr_x += clock.width + P_SPACER
-                clock.x2 = curr_x
+                clock.x1 = location.x
+                clock.y1 = location.y
+
+                location.incPos(P_SPACER)
+                self.drawText(clock, location.x, location.y, clock.width)
+                location.incPos(P_SPACER)
+
+                if P_LOCATION < 2:
+                    location.x += clock.width
+                    clock.x2 = location.x
+                else:
+                    clock.x2 = P_THICKNESS
+
+                clock.y2 = clock.y1 + I_HEIGHT #TODO iconheight is textheight
+
+
+                #TODO showlines
+                '''
                 if SHOWLINES and not clock.last:
                     win.poly_segment(self.lgc, [(curr_x, 0, curr_x, P_HEIGHT)])
+                '''
             elif panel[section].id == "desktop":
+                desktop.x1 = location.x
+                desktop.y1 = location.y
                 desk = panel[section].names[cdt]
-                desktop.x1 = curr_x
-                curr_x += P_SPACER
-                self.drawText(desk, curr_x, 0)
-                curr_x += desk.width + P_SPACER
-                desktop.x2 = curr_x
+
+                location.incPos(P_SPACER)
+                self.drawText(desk, location.x, location.y, desk.width)
+                location.incPos(P_SPACER)
+
+                if P_LOCATION < 2:
+                    location.x += desk.width
+                    desktop.x2 = location.x
+                else:
+                    desktop.x2 = P_THICKNESS
+
+                desktop.y2 = desktop.y1 + I_HEIGHT #TODO iconheight is textheight
+
+                #TODO showlines
+                '''
                 if SHOWLINES and not desktop.last:
                     win.poly_segment(self.lgc, [(curr_x, 0, curr_x, P_HEIGHT)])
+                '''
             elif panel[section].id == "tray" and tray:
-                curr_x += 2
+                location.incPos(2) # not sure why this is here
+
                 for tid in tray.order:
                     t = tray.tasks[tid]
-                    t.x = curr_x
-                    t.y = (P_HEIGHT-t.height)/2
-                    t.obj.configure(onerror=self.error, x=curr_x, y=t.y,
-                         width=t.width, height=t.height)
+                    t.x = location.x
+                    t.y = location.y
+                    t.obj.configure(onerror=self.error, x=location.x, y=location.y, width=t.width, height=t.height) # TODO tray icon size? width height
                     t.obj.map(onerror=self.error)
-                    curr_x += t.width
-                curr_x += 1
+                    location.incPos(t.width) # this should be square
+
+                location.incPos(1) # not sure why this is here
+
+                #TODO showlines
+
+                '''
                 if SHOWLINES and not tray.last:
                     win.poly_segment(self.lgc, [(curr_x, 0, curr_x, P_HEIGHT)])
+                '''
             elif panel[section].id == "launcher" and launcher:
-                curr_x += 2
+                location.incPos(2) # not sure why this is here
+
                 for app in launcher.order:
                     a = launcher.tasks[app]
-                    a.x1 = curr_x
-                    if self.getIcon(a, curr_x, 1):
-                        curr_x += APPL_I_WIDTH
-                    a.x2 = curr_x
-                curr_x += 1
+                    a.x1 = location.x
+                    a.y1 = location.y
+                    if self.location.getIcon(self.window.id, a, location.x, location.y, 1):
+                        location.incPos(APPL_I_WIDTH) #TODO square
+                    a.x2 = a.x1 + APPL_I_WIDTH
+                    a.y2 = a.y1 + APPL_I_HEIGHT # TODO square again
+
+                location.incPos(1) # not sure why this is here
+
+                #TODO showlines
+                '''
                 if SHOWLINES and not launcher.last:
                     win.poly_segment(self.lgc, [(curr_x, 0, curr_x, P_HEIGHT)])
+                '''
 
     #------------------------------------------------------
     def updateTasks(self, dsp, root, win, panel, update=0):
@@ -800,8 +1100,7 @@ class PyPanel(object):
                 obj.change_attributes(event_mask=(
                     X.PropertyChangeMask|X.FocusChangeMask|X.StructureNotifyMask))
 
-            t = Obj(id=task, obj=obj, name=name, tclass=tclass, x1=-1, x2=-1,
-                desk=odt, visible=0, hidden=hide)
+            t = Obj(id=task, obj=obj, name=name, tclass=tclass, x1=-1, x2=-1, y1=-1, y2=-1, desk=odt, visible=0, hidden=hide)
 
             panel[TASKS].order.append(task)
             panel[TASKS].tasks[task] = t
@@ -863,10 +1162,13 @@ class PyPanel(object):
                             self.setIcon(t)
                             if t.visible:
                                 x = t.x1 + P_SPACER
-                                self.clearPanel(x, 0, t.x2-x, P_HEIGHT)
-                                if self.getIcon(t, x):
+                                y = t.y1
+                                width = t.x2 - t.x
+                                height = t.y2 - t.y
+                                self.clearPanel(x, y, width, height)
+                                if self.location.getIcon(self.window.id, t, x, y):
                                     x += I_WIDTH+P_SPACER
-                                self.drawText(t, x, t.x2-x-P_SPACER)
+                                self.drawText(t, x, y, width - P_SPACER)
                 elif e.type == X.ConfigureNotify and TRAY:
                     if e.window.id in tray.tasks:
                         task = tray.tasks[e.window.id]
@@ -895,7 +1197,7 @@ class PyPanel(object):
                             if self.setState(tasks.tasks[wid], panel, win):
                                 self.updatePanel(root, win, panel)
                 elif e.type == X.Expose and e.count == 0:
-                    if e.width == P_WIDTH:
+                    if e.width == P_THICKNESS: # TODO wtf is this
                         win.change_property(self._DESKTOP, Xatom.CARDINAL, 32, [0xffffffffL])
                         self.sendEvent(win, self._STATE, [1, self._STICKY])
                         self.sendEvent(win, self._STATE, [1, self._SKIP_PAGER])
@@ -916,14 +1218,14 @@ class PyPanel(object):
                 now = self.getClockData()
                 if clock.name != now:
                     clock.name = now
-                    self.clearPanel(clock.x1+1, 0, clock.x2-(clock.x1+1), P_HEIGHT)
-                    self.drawText(clock, clock.x1+P_SPACER, 0)
+                    self.clearPanel(clock.x1, clock.y1, clock.x2 - clock.x1, clock.y2 - clock.y1)
+                    self.drawText(clock, clock.x1 + P_SPACER, clock.y1, clock.width)
 
 #----------------------------------------------------------------------------
 #                                  Main
 #----------------------------------------------------------------------------
 from distutils import sysconfig
-from ppmodule import ppinit, ppshade, ppicon, ppfont, ppfontsize, ppclear
+from ppmodule import ppinit, ppshade, ppicon, ppfont, ppfontsize, ppfontsizeheight, ppclear
 from Xlib import X, display, error, Xatom, Xutil
 import Xlib.protocol.event
 import locale, os, pwd, select, sys, time

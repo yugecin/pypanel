@@ -33,12 +33,13 @@ CLOCK_SHADOW_COLOR     = "0xffffff"
 
 #------------------------------------------------------------------------------
 # Panel Spacing and Location Options: Measured in pixels
+# NOTE: if orientation is vertical (left or right), width is height and height is width
 #------------------------------------------------------------------------------
-P_LOCATION      = 1             # Panel placement: 0 = top, 1 = bottom
-P_WIDTH         = 0             # Panel width: 0 = Use full screen width
-P_START         = 0             # Starting X coordinate of the panel
+P_LOCATION      = 1             # Panel placement: 0 = top, 1 = bottom, 2 = left, 3 = right
+P_LENGTH        = 0             # Panel length: 0 = Use full screen size
+P_START         = 0             # Starting X (or Y if vertical) coordinate of the panel
 P_SPACER        = 6             # Spacing between panel objects
-P_HEIGHT        = 24            # Panel height
+P_THICKNESS     = 24            # Panel height (or width if vertical)
 
 #------------------------------------------------------------------------------
 # Panel Tasks Options

@@ -82,7 +82,7 @@ static PyObject * _ppfont(PyObject *self, PyObject *args) {
     int len, font_y, p_height;
     float font_x, limit;
 
-    if (!PyArg_ParseTuple(args, "llfifs#", &win, &pixel, &font_x, &p_height,
+    if (!PyArg_ParseTuple(args, "llffifs#", &win, &pixel, &font_x, &font_y, &p_height,
                           &limit, &text, &len))
         return NULL;
 
@@ -100,7 +100,7 @@ static PyObject * _ppfont(PyObject *self, PyObject *args) {
     }
 
     XQueryColor(dsp, cmap, &xcol);
-    font_y     = xf->ascent+((p_height-(xf->ascent+xf->descent))/2);
+    font_y     = font_y + xf->ascent+((p_height-(xf->ascent+xf->descent))/2);
     rcol.red   = xcol.red;
     rcol.green = xcol.green;
     rcol.blue  = xcol.blue;
@@ -139,6 +139,28 @@ static PyObject * _ppfontsize(PyObject *self, PyObject *args) {
     return Py_BuildValue("i", ginfo.width);
 #else
     return Py_BuildValue("i", (int)XTextWidth(xf, text, len));
+#endif
+}
+/*------------------------------------------------------------*/
+static PyObject * _ppfontsizeheight(PyObject *self, PyObject *args) {
+/*------------------------------------------------------------*/
+#ifdef HAVE_XFT
+    XGlyphInfo ginfo;
+#endif
+    char *text;
+    int len;
+
+    if (!PyArg_ParseTuple(args, "s#", &text, &len))
+        return NULL;
+
+#ifdef HAVE_XFT
+    XftTextExtentsUtf8(dsp, xf, text, len, &ginfo);
+    return Py_BuildValue("i", ginfo.height);
+#else
+    int dr, fdr, dat;
+    XCharStruct cstruct;
+    XTextExtents(dsp, text, len, &dr, &far, &fdr, &cstruct);
+    return Py_BuildValue("i", cstruct.ascent + cstruct.descent);
 #endif
 }
 
@@ -265,7 +287,7 @@ static PyObject * _ppinit(PyObject *self, PyObject *args) {
        attempting to open them later with the RTLD_NOW flag which fails.  If
        you're reading this and know of a proper solution, please let me know ..
     */
-    handle = dlopen("/usr/lib/libImlib2.so.1", RTLD_NOW|RTLD_GLOBAL);
+    handle = dlopen("/usr/lib/x86_64-linux-gnu/libImlib2.so.1", RTLD_NOW|RTLD_GLOBAL);
 
     if (!handle) {
         printf("Imlib2 dlopen failed: %s\n", dlerror());
@@ -295,12 +317,13 @@ static PyObject * _ppinit(PyObject *self, PyObject *args) {
 /*-------------------------------*/
 static PyMethodDef PPMethods[] = {
 /*-------------------------------*/
-    {"ppclear",    _ppclear,    METH_VARARGS, "Clear Area"},
-    {"ppfont",     _ppfont,     METH_VARARGS, "Font Rendering"},
-    {"ppfontsize", _ppfontsize, METH_VARARGS, "Return Size of Given Font"},
-    {"ppicon",     _ppicon,     METH_VARARGS, "Icon Rendering"},
-    {"ppshade",    _ppshade,    METH_VARARGS, "Background Rendering"},
-    {"ppinit",     _ppinit,     METH_VARARGS, "Initialization"},
+    {"ppclear",          _ppclear,          METH_VARARGS, "Clear Area"},
+    {"ppfont",           _ppfont,           METH_VARARGS, "Font Rendering"},
+    {"ppfontsize",       _ppfontsize,       METH_VARARGS, "Return Size of Given Font"},
+    {"ppfontsizeheight", _ppfontsizeheight, METH_VARARGS, "Return Size of Given Font"},
+    {"ppicon",           _ppicon,           METH_VARARGS, "Icon Rendering"},
+    {"ppshade",          _ppshade,          METH_VARARGS, "Background Rendering"},
+    {"ppinit",           _ppinit,           METH_VARARGS, "Initialization"},
     {NULL, NULL, 0, NULL}
 };
 
