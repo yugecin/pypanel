@@ -75,9 +75,9 @@ class HorizontalLayout(object):
 
         return ppfontsize(text)
 
-    #--------------------------------------
+    #------------------------------------------------
     def getIcon(self, winid, task, x, y, launcher=0):
-    #--------------------------------------
+    #------------------------------------------------
         if not launcher and not APPICONS:
             return 0
 
@@ -101,9 +101,9 @@ class HorizontalLayout(object):
 
         return 1
 
-    #------------------------------------------
+    #-----------------------------------
     def getTaskEndPosition(self, space):
-    #------------------------------------------
+    #-----------------------------------
 
         return [
             self.x + space,
@@ -188,9 +188,9 @@ class VerticalLayout(object):
 
         return ppfontsizeheight(text)
 
-    #--------------------------------------
+    #------------------------------------------------
     def getIcon(self, winid, task, x, y, launcher=0):
-    #--------------------------------------
+    #------------------------------------------------
         if not launcher and not APPICONS:
             return 0
 
@@ -853,9 +853,9 @@ class PyPanel(object):
             b = int("0x"+BG_COLOR[6:8],0)
             ppshade(win.id, rpm, self.location.posx, self.location.posy, self.location.width, self.location.height, r, g, b, SHADE)
 
-    #-------------------------------------
+    #------------------------
     def getTimeInBeats(self):
-    #-------------------------------------
+    #------------------------
 
         def _cleanupBeats(rawBeats):
             if rawBeats > 1000:
@@ -877,9 +877,9 @@ class PyPanel(object):
 
         return _cleanBeatsCalculation(*time.localtime()[3:6])
 
-    #-------------------------------------
+    #----------------------
     def getClockData(self):
-    #-------------------------------------
+    #----------------------
 
         if self.beats:
             return self.getTimeInBeats()
