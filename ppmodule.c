@@ -141,28 +141,6 @@ static PyObject * _ppfontsize(PyObject *self, PyObject *args) {
     return Py_BuildValue("i", (int)XTextWidth(xf, text, len));
 #endif
 }
-/*------------------------------------------------------------*/
-static PyObject * _ppfontsizeheight(PyObject *self, PyObject *args) {
-/*------------------------------------------------------------*/
-#ifdef HAVE_XFT
-    XGlyphInfo ginfo;
-#endif
-    char *text;
-    int len;
-
-    if (!PyArg_ParseTuple(args, "s#", &text, &len))
-        return NULL;
-
-#ifdef HAVE_XFT
-    XftTextExtentsUtf8(dsp, xf, text, len, &ginfo);
-    return Py_BuildValue("i", ginfo.height);
-#else
-    int dr, fdr, dat;
-    XCharStruct cstruct;
-    XTextExtents(dsp, text, len, &dr, &far, &fdr, &cstruct);
-    return Py_BuildValue("i", cstruct.ascent + cstruct.descent);
-#endif
-}
 
 /*--------------------------------------------------------*/
 static PyObject * _ppicon(PyObject *self, PyObject *args) {
@@ -320,7 +298,6 @@ static PyMethodDef PPMethods[] = {
     {"ppclear",          _ppclear,          METH_VARARGS, "Clear Area"},
     {"ppfont",           _ppfont,           METH_VARARGS, "Font Rendering"},
     {"ppfontsize",       _ppfontsize,       METH_VARARGS, "Return Size of Given Font"},
-    {"ppfontsizeheight", _ppfontsizeheight, METH_VARARGS, "Return Size of Given Font"},
     {"ppicon",           _ppicon,           METH_VARARGS, "Icon Rendering"},
     {"ppshade",          _ppshade,          METH_VARARGS, "Background Rendering"},
     {"ppinit",           _ppinit,           METH_VARARGS, "Initialization"},

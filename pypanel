@@ -69,12 +69,6 @@ class HorizontalLayout(object):
 
         self.x += inc
 
-    #---------------------------
-    def getTextSize(self, text):
-    #---------------------------
-
-        return ppfontsize(text)
-
     #------------------------------------------------
     def getIcon(self, winid, task, x, y, launcher=0):
     #------------------------------------------------
@@ -181,12 +175,6 @@ class VerticalLayout(object):
     #---------------------
 
         self.y += inc
-
-    #---------------------------
-    def getTextSize(self, text):
-    #---------------------------
-
-        return ppfontsizeheight(text)
 
     #------------------------------------------------
     def getIcon(self, winid, task, x, y, launcher=0):
@@ -1232,7 +1220,7 @@ class PyPanel(object):
 #                                  Main
 #----------------------------------------------------------------------------
 from distutils import sysconfig
-from ppmodule import ppinit, ppshade, ppicon, ppfont, ppfontsize, ppfontsizeheight, ppclear
+from ppmodule import ppinit, ppshade, ppicon, ppfont, ppfontsize, ppclear
 from Xlib import X, display, error, Xatom, Xutil
 import Xlib.protocol.event
 import locale, os, pwd, select, sys, time
