@@ -39,7 +39,7 @@ P_LOCATION      = 1             # Panel placement: 0 = top, 1 = bottom, 2 = left
 P_LENGTH        = 0             # Panel length: 0 = Use full screen size
 P_START         = 0             # Starting X (or Y if vertical) coordinate of the panel
 P_SPACER        = 6             # Spacing between panel objects
-P_THICKNESS     = 24            # Panel height (or width if vertical)
+P_THICKNESS     = 15            # Panel height (or width if vertical)
 
 #------------------------------------------------------------------------------
 # Panel Tasks Options
@@ -54,6 +54,9 @@ T_FORCE_ASCII   = 0             # Remove unicode characters: 0 = No, 1 = Yes
 #------------------------------------------------------------------------------
 # Icon Size Options: Measured in pixels
 #------------------------------------------------------------------------------
+I_SIZE          = 15
+# I_SIZE is also being used for element height in vertical orientation
+# DEPRECATED: all icons use I_SIZE
 I_HEIGHT        = 16            # Panel application icon height
 I_WIDTH         = 16            # Panel application icon Width
 APPL_I_HEIGHT   = 24            # Application launcher icon height
