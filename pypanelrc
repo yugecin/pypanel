@@ -48,6 +48,7 @@ P_THICKNESS     = 15            # Panel height (or width if vertical)
 # libXft was not put in the configs in setup.py (path to freetype-config)
 #------------------------------------------------------------------------------
 T_FILL          = 0             # Tasks fill panel width: 0 = No, 1 = Yes
+T_CENTER_TEXT   = 1             # Center task text when there's enough space
 T_WIDTH         = 180           # Task width
 T_FORCE_ASCII   = 0             # Remove unicode characters: 0 = No, 1 = Yes
 
