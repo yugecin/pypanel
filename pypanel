@@ -312,7 +312,7 @@ class PyPanel(object):
             self.panel[DESKTOP] = Obj(id="desktop", names=[], first=0, last=0)
         if CLOCK:
             self.panel["sections"].append(CLOCK)
-            self.panel[CLOCK] = Obj(id="clock", name="", first=0, last=0, x1=0, x2=0, y1=0, y2=0, color=self.getColor(CLOCK_COLOR), shadow=self.getColor(CLOCK_SHADOW_COLOR))
+            self.panel[CLOCK] = Obj(id="clock", name="", first=0, last=0, x1=0, x2=0, y1=0, y2=0, color=self.getColor(CLOCK_COLOR), shadow=self.getColor(CLOCK_SHADOW_COLOR), width=-1)
         if TRAY:
             self.panel["sections"].append(TRAY)
             self.panel[TRAY] = Obj(id="tray", tasks={}, order=[], first=0, last=0, window=self.window)
@@ -1257,6 +1257,7 @@ class PyPanel(object):
                 now = self.getClockData()
                 if clock.name != now:
                     clock.name = now
+                    clock.width = ppfontsize(clock.name)
                     self.clearPanel(clock.x1, clock.y1, clock.x2 - clock.x1, clock.y2 - clock.y1)
                     self.location.drawClockDesktopText(self, clock)
 
