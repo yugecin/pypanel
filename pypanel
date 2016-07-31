@@ -447,7 +447,7 @@ class PyPanel(object):
             title = obj.name.encode('ascii', 'ignore')
 
         if SHADOWS:
-            ppfont(self.window.id, obj.shadow, x+1, y+1, I_SIZE+2, width, title)
+            ppfont(self.window.id, obj.shadow, x+1, y+1, I_SIZE, width, title)
         ppfont(self.window.id, obj.color, x, y, I_SIZE, width, title)
 
     #----------------------------
