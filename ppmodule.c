@@ -78,7 +78,7 @@ static PyObject * _ppfont(PyObject *self, PyObject *args) {
     CARD32 pixel;
     Window win;
     XColor xcol;
-    char *text;
+    const FcChar8 *text;
     int len, p_height;
     float font_y, font_x, limit;
 
@@ -128,7 +128,7 @@ static PyObject * _ppfontsize(PyObject *self, PyObject *args) {
 #ifdef HAVE_XFT
     XGlyphInfo ginfo;
 #endif
-    char *text;
+    const FcChar8 *text;
     int len;
 
     if (!PyArg_ParseTuple(args, "s#", &text, &len))
@@ -165,7 +165,8 @@ static PyObject * _ppicon(PyObject *self, PyObject *args) {
         icon = imlib_create_image_using_data(w, h, (DATA32*)data);
     else if (win_icon) {
         /* wmhints icon */
-        if (!XGetGeometry(dsp, win_icon, &root, &s1, &s1, &s1, &s1, &s1, &s1))
+        unsigned int _s1;
+        if (!XGetGeometry(dsp, win_icon, &root, &s1, &s1, &_s1, &_s1, &_s1, &_s1))
             icon = NULL;
         else {
             scm = XAllocStandardColormap();
