@@ -584,7 +584,16 @@ class PyPanel(object):
             if APPICONS:
                 x += I_SIZE + P_SPACER
             self.clearPanel(x, task.y1, task.x2-x, task.y2 - task.y1)
-            self.drawText(task, x, task.y1, task.x2 - x)
+
+            text_x = x
+            width = task.x2 - x
+            if T_CENTER_TEXT:
+                text_width = ppfontsize(task.name) + 2
+                if text_width < width:
+                    text_x += (width - text_width) / 2
+                else:
+                    text_width = width
+            self.drawText(task, text_x, task.y1, text_width)
 
         return 0
 
