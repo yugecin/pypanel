@@ -1282,13 +1282,13 @@ class PyPanel(object):
                             t = tasks.tasks[e.window.id]
                             self.setIcon(t)
                             if t.visible:
-                                x = t.x1 + P_SPACER
+                                x = t.x1
                                 y = t.y1
-                                width = t.x2 - t.x
-                                height = t.y2 - t.y
+                                width = t.x2 - t.x1
+                                height = t.y2 - t.y1
                                 self.clearPanel(x, y, width, height)
                                 if self.location.getIcon(self.window.id, t, x, y):
-                                    x += I_SIZE+P_SPACER
+                                    x += I_SIZE + P_SPACER
                                 self.drawText(t, x, y, width - P_SPACER)
                 elif e.type == X.ConfigureNotify and TRAY:
                     if e.window.id in tray.tasks:
