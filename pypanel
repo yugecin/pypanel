@@ -142,6 +142,18 @@ class HorizontalLayout(object):
             x = self.x - P_SPACER / 2
             win.poly_segment(lgc, [(x, self.y, x, self.y + P_THICKNESS)])
 
+    #--------------------------
+    def expand(self, pnl, win):
+    #--------------------------
+
+        return 0
+
+    #--------------------------
+    def shrink(self, pnl, win):
+    #--------------------------
+
+        return 0
+
 #----------------------------------------------------------------------------
 class VerticalLayout(object):
 #----------------------------------------------------------------------------
@@ -149,6 +161,7 @@ class VerticalLayout(object):
     x = 0
     y = 0
     rowicons = 0
+    expandstate = 0
 
     #--------------------------
     def __init__(self, screen):
@@ -231,7 +244,7 @@ class VerticalLayout(object):
     def getTaskTextLimit(self, visible, space):
     #------------------------------------------
 
-        limit = P_THICKNESS
+        limit = self.width
 
         # if show icons, subtract that from task width too (+ spacer)
         if APPICONS:
@@ -246,9 +259,9 @@ class VerticalLayout(object):
     def drawClockDesktopText(self, panel, obj):
     #------------------------------------------
 
-        if obj.width < P_THICKNESS:
+        if obj.width < self.width:
             # nicely in the middle of the bar if vertical (and enough space)
-            x = (P_THICKNESS - obj.width) / 2
+            x = (self.width - obj.width) / 2
             panel.drawText(obj, x, obj.y1, obj.width)
 
     #----------------------------
@@ -257,7 +270,39 @@ class VerticalLayout(object):
 
         if SHOWLINES:
             y = self.y - P_SPACER / 2
-            win.poly_segment(lgc, [(self.x, y, self.x + P_THICKNESS, y)])
+            win.poly_segment(lgc, [(self.x, y, self.x + self.width, y)])
+
+    #--------------------------
+    def expand(self, pnl, win):
+    #--------------------------
+
+        if self.expandstate:
+            return 0
+
+        self.expandstate = 1
+
+        self.width = P_EXPAND
+        if P_LOCATION == 3:
+            self.posx += P_THICKNESS - P_EXPAND
+
+        pnl.setStruts(win, state=2)
+        return 1
+
+    #--------------------------
+    def shrink(self, pnl, win):
+    #--------------------------
+
+        if not self.expandstate:
+            return 0
+
+        self.expandstate = 0
+
+        self.width = P_THICKNESS
+        if P_LOCATION == 3:
+            self.posx += P_EXPAND - P_THICKNESS
+
+        pnl.setStruts(win, state=0)
+        return 1
 
 #----------------------------------------------------------------------------
 class PyPanel(object):
@@ -302,7 +347,7 @@ class PyPanel(object):
             window_class=X.InputOutput,
             visual=X.CopyFromParent,
             colormap=X.CopyFromParent,
-            event_mask=(X.ExposureMask|X.ButtonPressMask|X.ButtonReleaseMask|X.EnterWindowMask)
+            event_mask=(X.ExposureMask|X.ButtonPressMask|X.ButtonReleaseMask|X.EnterWindowMask|X.LeaveWindowMask)
         )
         ppinit(self.window.id, FONT)
 
@@ -458,7 +503,7 @@ class PyPanel(object):
             Xatom.ATOM, 32, [dsp.intern_atom("_NET_WM_WINDOW_TYPE_DOCK")])
 
     #----------------------------------
-    def setStruts(self, win, hidden=0):
+    def setStruts(self, win, state=0):
     #----------------------------------
 
         strutloc = ['top', 'bottom', 'left', 'right'][P_LOCATION]
@@ -467,8 +512,10 @@ class PyPanel(object):
         self.struts[strutloc + '_start'] = P_START
         self.struts[strutloc + '_end'  ] = P_START + P_LENGTH
 
-        if hidden:
+        if state == 1:
             self.struts[strutloc] = HIDDEN_SIZE
+        if state == 2:
+            self.struts[strutloc] = P_EXPAND
 
         win.change_property(self._STRUT, Xatom.CARDINAL, 32, [
             self.struts['left'],
@@ -718,7 +765,7 @@ class PyPanel(object):
         """ Hide/Unhide the Panel """
         if self.hidden:
             self.window.configure(x=self.location.posx, y=self.location.posy, width=self.location.width, height=self.location.height)
-            self.setStruts(self.window, hidden=0)
+            self.setStruts(self.window, state=0)
             if ABOVE:
                 self.sendEvent(self.window, self._STATE, [0, self._BELOW])
                 self.sendEvent(self.window, self._STATE, [1, self._ABOVE])
@@ -744,9 +791,35 @@ class PyPanel(object):
                 width = HIDDEN_SIZE
 
             self.window.configure(x=x, y=y, width=width, height=height)
-            self.setStruts(self.window, hidden=1)
+            self.setStruts(self.window, state=1)
 
         self.hidden = not self.hidden
+
+    #----------------------------------------
+    def updateExpand(self, root, win, panel):
+    #----------------------------------------
+
+        win.set_wm_normal_hints(
+            flags=(
+                Xutil.PPosition|Xutil.PMaxSize|Xutil.PMinSize
+            ),
+            min_width=self.location.width,
+            min_height=self.location.height,
+            max_width=self.location.width,
+            max_height=self.location.height
+        )
+        win.configure(width=self.location.width)
+        # dirty sh#!, prevents flickering
+        # if expand is large, position would be changed to x
+        # but width has not been changed yet which means the
+        # mouse is not hovering the panel atm and X fires a
+        # leave event, which causes it to shrink again...
+        # So change width first, wait a bit, and change x
+        time.sleep(0.03)
+        win.configure(x=self.location.posx)
+        self.updatePanel(root, win, panel)
+        self.sendEvent(win, self._STATE, [0, self._BELOW])
+        self.sendEvent(win, self._STATE, [1, self._ABOVE])
 
     #----------------------------------------
     def toggleMinimize(self, task, traise=1):
@@ -1029,7 +1102,7 @@ class PyPanel(object):
                     clock.x2 = location.x
                 else:
                     location.y += I_SIZE
-                    clock.x2 = P_THICKNESS
+                    clock.x2 = location.width
 
                 clock.y2 = clock.y1 + I_SIZE
 
@@ -1052,7 +1125,7 @@ class PyPanel(object):
                     desktop.x2 = location.x
                 else:
                     location.y += I_SIZE
-                    desktop.x2 = P_THICKNESS
+                    desktop.x2 = location.width
 
                 desktop.y2 = desktop.y1 + I_SIZE
 
@@ -1224,10 +1297,16 @@ class PyPanel(object):
                             tray.tasks[task] = Obj(obj=obj, x=0, y=0, width=0, height=I_SIZE)
                             tray.order.append(task)
                             self.updatePanel(root, win, panel)
-                elif e.type == X.EnterNotify and self.hidden:
-                    if e.window.id == win.id:
-                        self.toggleHidden()
-                        self.updateTasks(dsp, root, win, panel)
+                elif e.type == X.EnterNotify and e.window.id == win.id:
+                        if self.location.expand(self, win):
+                            self.updateExpand(root, win, panel)
+                            self.hidden = 0
+                        elif self.hidden:
+                            self.toggleHidden()
+                            self.updateTasks(dsp, root, win, panel)
+                elif e.type == X.LeaveNotify and e.window.id == win.id:
+                        if self.location.shrink(self, win):
+                            self.updateExpand(root, win, panel)
                 elif e.type == X.FocusIn:
                     prev_focus = self.focus
                     self.focus = e.window.id
@@ -1303,6 +1382,8 @@ P_THICKNESS = None
 P_LENGTH = None
 BEATS_FORMAT = "@%.2f .beats"
 T_CENTER_TEXT = 1
+# 160731
+P_EXPAND = 50
 
 #-------------------------
 if __name__ == "__main__":

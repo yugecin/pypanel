@@ -40,6 +40,10 @@ P_LENGTH        = 0             # Panel length: 0 = Use full screen size
 P_START         = 0             # Starting X (or Y if vertical) coordinate of the panel
 P_SPACER        = 6             # Spacing between panel objects
 P_THICKNESS     = 15            # Panel height (or width if vertical)
+P_EXPAND        = 50            # Set P_THICKNESS to this size when mouse hovers bar.
+                                #   Usefull for vertical layouts to have enough space
+                                #   to show each task name. Has no effect when layout
+                                #   is horizontal. Set to 0 to disable
 
 #------------------------------------------------------------------------------
 # Panel Tasks Options
