@@ -90,6 +90,24 @@ http://pypanel.sourceforge.net
 -------------------------------------------------------------------------------
                                     History
 -------------------------------------------------------------------------------
+160731   New features:
+            Option for expanding the bar when hovering over it and when in vertical mode. This
+               can be used to see the task names when using a small thickness
+         Bug fixes:
+            Fixed warning messages coming from ppmodule.c when installing
+         New config options:
+            P_EXPAND : size to expand to when hovering bar in vertical mode
+
+160730   New features:
+            Ability to use vertical layouts for panel
+            Option to put task text centered
+            Format option for beats
+         New config options:
+            I_SIZE       : icon size. used for all icons (width & height), old icon options are not being used anymore
+            P_THICKNESS  : replaces P_HEIGHT to make more sense in vertical layouts
+            P_LENGTH     : replaces P_WIDTH to make more sense in vertical layouts
+            BEATS_FORMAT : format to use when using Swatch Internet Time
+
 160526   Bug fixes:
             Fix crashes caused by unicode characters in window titles (issue#2)
 
