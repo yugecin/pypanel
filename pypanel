@@ -1253,89 +1253,7 @@ class PyPanel(object):
         while 1:
             while dsp.pending_events():
                 e = dsp.next_event()
-                if e.type == X.ButtonRelease:
-                    self.buttonRelease(root, panel, e)
-                elif e.type == X.DestroyNotify:
-                    if self.taskDelete(e.window.id, panel):
-                        self.updatePanel(root, win, panel)
-                elif e.type == X.PropertyNotify:
-                    if e.atom in [self._CURRENT_DESKTOP, self._DESKTOP]:
-                        if hasattr(e, "window"):
-                            if e.window.id in tasks.tasks:
-                                t = tasks.tasks[e.window.id]
-                                t.desk = self.getDesktop(t.obj)
-                        self.updatePanel(root, win, panel)
-                    elif e.atom in [self._DESKTOP_NAMES, self._DESKTOP_COUNT]:
-                        self.getDesktopNames()
-                        self.updatePanel(root, win, panel)
-                    elif e.atom == self._CLIENT_LIST:
-                        self.updateTasks(dsp, root, win, panel)
-                    elif e.atom == self._RPM:
-                        self.updatePanel(root, win, panel)
-                    elif e.window.id in tasks.tasks:
-                        if e.atom in [self._STATE, self._WMSTATE]:
-                            if self.setState(tasks.tasks[e.window.id], panel, win):
-                                self.updatePanel(root, win, panel)
-                        elif e.atom in [Xatom.WM_NAME, self._NAME]:
-                            self.setName(win, tasks.tasks[e.window.id])
-                        elif e.atom in [Xatom.WM_HINTS, self._ICON]:
-                            t = tasks.tasks[e.window.id]
-                            self.setIcon(t)
-                            if t.visible:
-                                x = t.x1
-                                y = t.y1
-                                width = t.x2 - t.x1
-                                height = t.y2 - t.y1
-                                self.clearPanel(x, y, width, height)
-                                if self.location.getIcon(self.window.id, t, x, y):
-                                    x += I_SIZE + P_SPACER
-                                self.drawText(t, x, y, width - P_SPACER)
-                elif e.type == X.ConfigureNotify and TRAY:
-                    if e.window.id in tray.tasks:
-                        task = tray.tasks[e.window.id]
-                        task.obj.configure(onerror=self.error, width=task.width, height=task.height)
-                elif e.type == X.ClientMessage and TRAY:
-                    if e.window == self.selowin:
-                        data = e.data[1][1] # opcode
-                        task = e.data[1][2] # taskid
-                        if e.client_type == self._OPCODE and data == 0:
-                            # SYSTEM_TRAY_REQUEST_DOCK opcode = 0
-                            obj = dsp.create_resource_object("window", task)
-                            obj.reparent(tray.window.id, 0, 0)
-                            obj.change_attributes(event_mask=(X.ExposureMask|X.StructureNotifyMask))
-                            tray.tasks[task] = Obj(obj=obj, x=0, y=0, width=0, height=I_SIZE)
-                            tray.order.append(task)
-                            self.updatePanel(root, win, panel)
-                elif e.type == X.EnterNotify and e.window.id == win.id:
-                        if self.location.expand(self, win):
-                            self.updateExpand(root, win, panel)
-                            self.hidden = 0
-                        elif self.hidden:
-                            self.toggleHidden()
-                            self.updateTasks(dsp, root, win, panel)
-                elif e.type == X.LeaveNotify and e.window.id == win.id:
-                        if self.location.shrink(self, win):
-                            self.updateExpand(root, win, panel)
-                elif e.type == X.FocusIn:
-                    prev_focus = self.focus
-                    self.focus = e.window.id
-                    for wid in (e.window.id, prev_focus):
-                        if wid in tasks.tasks:
-                            if self.setState(tasks.tasks[wid], panel, win):
-                                self.updatePanel(root, win, panel)
-                elif e.type == X.Expose and e.count == 0:
-                    if e.width == P_THICKNESS:
-                        win.change_property(self._DESKTOP, Xatom.CARDINAL, 32, [0xffffffffL])
-                        self.sendEvent(win, self._STATE, [1, self._STICKY])
-                        self.sendEvent(win, self._STATE, [1, self._SKIP_PAGER])
-                        self.sendEvent(win, self._STATE, [1, self._SKIP_TASKBAR])
-                        if ABOVE:
-                            self.sendEvent(win, self._STATE, [1, self._ABOVE])
-                        else:
-                            self.sendEvent(win, self._STATE, [1, self._BELOW])
-                        self.updateTasks(dsp, root, win, panel, 1)
-                    else:
-                        self.updatePanel(root, win, panel)
+                self.handle_event(e, tray, tasks, dsp, root, win, panel)
 
             rs, ws, es = select.select([dsp.display.socket], [], [], CLOCK_DELAY)
             if not rs:
@@ -1348,6 +1266,100 @@ class PyPanel(object):
                     clock.width = ppfontsize(clock.name)
                     self.clearPanel(clock.x1, clock.y1, clock.x2 - clock.x1, clock.y2 - clock.y1)
                     self.location.drawClockDesktopText(self, clock)
+
+    #-------------------------------------------------------------
+    def handle_event(self, e, tray, tasks, dsp, root, win, panel):
+    #-------------------------------------------------------------
+
+        if e.type == X.ButtonRelease:
+            self.buttonRelease(root, panel, e)
+        elif e.type == X.DestroyNotify:
+            if self.taskDelete(e.window.id, panel):
+                self.updatePanel(root, win, panel)
+        elif e.type == X.PropertyNotify:
+            if e.atom in [self._CURRENT_DESKTOP, self._DESKTOP]:
+                if hasattr(e, "window"):
+                    if e.window.id in tasks.tasks:
+                        t = tasks.tasks[e.window.id]
+                        t.desk = self.getDesktop(t.obj)
+                self.updatePanel(root, win, panel)
+            elif e.atom in [self._DESKTOP_NAMES, self._DESKTOP_COUNT]:
+                self.getDesktopNames()
+                self.updatePanel(root, win, panel)
+            elif e.atom == self._CLIENT_LIST:
+                self.updateTasks(dsp, root, win, panel)
+            elif e.atom == self._RPM:
+                self.updatePanel(root, win, panel)
+            elif e.window.id in tasks.tasks:
+                if e.atom in [self._STATE, self._WMSTATE]:
+                    if self.setState(tasks.tasks[e.window.id], panel, win):
+                        self.updatePanel(root, win, panel)
+                elif e.atom in [Xatom.WM_NAME, self._NAME]:
+                    self.setName(win, tasks.tasks[e.window.id])
+                elif e.atom in [Xatom.WM_HINTS, self._ICON]:
+                    t = tasks.tasks[e.window.id]
+                    self.setIcon(t)
+                    if t.visible:
+                        x = t.x1
+                        y = t.y1
+                        width = t.x2 - t.x1
+                        height = t.y2 - t.y1
+                        self.clearPanel(x, y, width, height)
+                        if self.location.getIcon(self.window.id, t, x, y):
+                            x += I_SIZE + P_SPACER
+                        self.drawText(t, x, y, width - P_SPACER)
+        elif e.type == X.ConfigureNotify and TRAY:
+            if e.window.id in tray.tasks:
+                task = tray.tasks[e.window.id]
+                task.obj.configure(onerror=self.error, width=task.width, height=task.height)
+        elif e.type == X.ClientMessage and TRAY:
+            if e.window == self.selowin:
+                data = e.data[1][1] # opcode
+                task = e.data[1][2] # taskid
+                if e.client_type == self._OPCODE and data == 0:
+                    # SYSTEM_TRAY_REQUEST_DOCK opcode = 0
+                    obj = dsp.create_resource_object("window", task)
+                    obj.reparent(tray.window.id, 0, 0)
+                    obj.change_attributes(event_mask=(X.ExposureMask|X.StructureNotifyMask|X.EnterWindowMask|X.LeaveWindowMask))
+                    tray.tasks[task] = Obj(obj=obj, x=0, y=0, width=0, height=I_SIZE)
+                    tray.order.append(task)
+                    self.updatePanel(root, win, panel)
+        elif e.type == X.EnterNotify:
+            if self.location.expand(self, win):
+                self.updateExpand(root, win, panel)
+                self.hidden = 0
+            elif self.hidden:
+                self.toggleHidden()
+                self.updateTasks(dsp, root, win, panel)
+        elif e.type == X.LeaveNotify:
+            if dsp.pending_events():
+                f = dsp.next_event()
+                if f.type == X.EnterNotify:
+                    # enter event, only from tray or own window, so ignore leave event
+                    return
+                self.handle_event(f, tray, tasks, dsp, root, win, panel)
+            if self.location.shrink(self, win):
+                self.updateExpand(root, win, panel)
+        elif e.type == X.FocusIn:
+            prev_focus = self.focus
+            self.focus = e.window.id
+            for wid in (e.window.id, prev_focus):
+                if wid in tasks.tasks:
+                    if self.setState(tasks.tasks[wid], panel, win):
+                        self.updatePanel(root, win, panel)
+        elif e.type == X.Expose and e.count == 0:
+            if e.width == P_THICKNESS:
+                win.change_property(self._DESKTOP, Xatom.CARDINAL, 32, [0xffffffffL])
+                self.sendEvent(win, self._STATE, [1, self._STICKY])
+                self.sendEvent(win, self._STATE, [1, self._SKIP_PAGER])
+                self.sendEvent(win, self._STATE, [1, self._SKIP_TASKBAR])
+                if ABOVE:
+                    self.sendEvent(win, self._STATE, [1, self._ABOVE])
+                else:
+                    self.sendEvent(win, self._STATE, [1, self._BELOW])
+                self.updateTasks(dsp, root, win, panel, 1)
+            else:
+                self.updatePanel(root, win, panel)
 
 #----------------------------------------------------------------------------
 #                                  Main
