@@ -1119,7 +1119,7 @@ class PyPanel(object):
                 if not clock.last:
                     location.drawLine(win, self.lgc)
 
-            elif panel[section].id == "desktop":
+            elif panel[section].id == "desktop" and 0 <= cdt and cdt < len(panel[section].names):
                 desktop.x1 = location.x
                 desktop.y1 = location.y
                 desk = panel[section].names[cdt]
